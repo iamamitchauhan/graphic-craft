@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Line, FabricObject, IText } from "fabric";
+import { Canvas as FabricCanvas, Line, FabricObject, IText, Group } from "fabric";
 import type { TemplateSize } from "@/pages/Editor";
 import { toast } from "sonner";
 
@@ -185,17 +185,40 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     // Enable text editing on double-click, or add text to shapes
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
-      if (target && target.type === "i-text") {
+      
+      // Check if target is a group with text
+      if (target && target.type === "group") {
+        const group = target as Group;
+        const textObj = group.getObjects().find(obj => obj.type === "i-text") as IText;
+        if (textObj) {
+          // Enter editing mode for text in group
+          group.set({ selectable: false });
+          canvas.setActiveObject(textObj);
+          textObj.enterEditing();
+          textObj.selectAll();
+          canvas.renderAll();
+          
+          // Re-enable group selection when text editing ends
+          textObj.on("editing:exited", () => {
+            group.set({ selectable: true });
+            canvas.setActiveObject(group);
+            canvas.renderAll();
+          });
+        }
+      } else if (target && target.type === "i-text") {
         const textObj = target as IText;
         textObj.enterEditing();
         textObj.selectAll();
         canvas.renderAll();
-      } else if (target && target.type !== "i-text") {
-        // Add text to shape
-        const center = target.getCenterPoint();
+      } else if (target && target.type !== "i-text" && target.type !== "group") {
+        // Add text to shape and group them
+        const shapeCenter = target.getCenterPoint();
+        const shapeLeft = target.left || 0;
+        const shapeTop = target.top || 0;
+        
         const text = new IText("Text", {
-          left: center.x,
-          top: center.y,
+          left: 0,
+          top: 0,
           fontSize: 24,
           fontWeight: "normal",
           fill: "#000000",
@@ -205,11 +228,37 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
           originX: "center",
           originY: "center",
         });
-        canvas.add(text);
-        canvas.setActiveObject(text);
-        text.enterEditing();
-        text.selectAll();
+        
+        // Remove the original shape
+        canvas.remove(target);
+        
+        // Create group with shape and text
+        const group = new Group([target, text], {
+          left: shapeLeft,
+          top: shapeTop,
+          originX: "left",
+          originY: "top",
+        });
+        
+        canvas.add(group);
+        canvas.setActiveObject(group);
         canvas.renderAll();
+        
+        // Immediately enter text editing
+        setTimeout(() => {
+          group.set({ selectable: false });
+          canvas.setActiveObject(text);
+          text.enterEditing();
+          text.selectAll();
+          canvas.renderAll();
+          
+          text.on("editing:exited", () => {
+            group.set({ selectable: true });
+            canvas.setActiveObject(group);
+            canvas.renderAll();
+          });
+        }, 100);
+        
         toast.success("Text added - edit now");
       }
     });
