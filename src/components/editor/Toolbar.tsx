@@ -409,7 +409,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
           fabricCanvas.clear();
           
           // Load the JSON data
-          fabricCanvas.loadFromJSON(json, () => {
+          fabricCanvas.loadFromJSON(json).then(() => {
             // Restore background color if present
             if (json.background) {
               fabricCanvas.backgroundColor = json.background;
@@ -421,7 +421,18 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
               fabricCanvas.backgroundImage = json.backgroundImage;
             }
             
-            fabricCanvas.renderAll();
+            // Ensure all objects are marked for rendering
+            fabricCanvas.getObjects().forEach((obj) => {
+              obj.setCoords();
+            });
+            
+            // Force canvas refresh
+            fabricCanvas.requestRenderAll();
+            
+            // Additional render to ensure visibility
+            setTimeout(() => {
+              fabricCanvas.renderAll();
+            }, 0);
             
             // Save to history
             const state = JSON.stringify(fabricCanvas.toJSON());
