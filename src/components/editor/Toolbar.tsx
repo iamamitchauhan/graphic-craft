@@ -364,35 +364,59 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     }
   };
 
-  const handleUndo = () => {
+  const handleUndo = async () => {
     if (historyStepRef.current > 0) {
       isUndoingRef.current = true;
       historyStepRef.current--;
       const state = historyRef.current[historyStepRef.current];
-      fabricCanvas.loadFromJSON(state, () => {
-        fabricCanvas.renderAll();
-        isUndoingRef.current = false;
+      
+      try {
+        await fabricCanvas.loadFromJSON(JSON.parse(state));
+        
+        // Ensure all objects are properly rendered
+        fabricCanvas.getObjects().forEach((obj) => {
+          obj.setCoords();
+        });
+        
+        fabricCanvas.requestRenderAll();
+        
         toast({
           title: "Undo",
           description: "Action undone",
         });
-      });
+      } catch (error) {
+        console.error("Undo failed:", error);
+      } finally {
+        isUndoingRef.current = false;
+      }
     }
   };
 
-  const handleRedo = () => {
+  const handleRedo = async () => {
     if (historyStepRef.current < historyRef.current.length - 1) {
       isUndoingRef.current = true;
       historyStepRef.current++;
       const state = historyRef.current[historyStepRef.current];
-      fabricCanvas.loadFromJSON(state, () => {
-        fabricCanvas.renderAll();
-        isUndoingRef.current = false;
+      
+      try {
+        await fabricCanvas.loadFromJSON(JSON.parse(state));
+        
+        // Ensure all objects are properly rendered
+        fabricCanvas.getObjects().forEach((obj) => {
+          obj.setCoords();
+        });
+        
+        fabricCanvas.requestRenderAll();
+        
         toast({
           title: "Redo",
           description: "Action redone",
         });
-      });
+      } catch (error) {
+        console.error("Redo failed:", error);
+      } finally {
+        isUndoingRef.current = false;
+      }
     }
   };
 
