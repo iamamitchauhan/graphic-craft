@@ -15,10 +15,19 @@ const Editor = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSize | null>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
+  const handleTemplateChange = (template: TemplateSize) => {
+    setSelectedTemplate(template);
+    setFabricCanvas(null); // Reset canvas to trigger re-render
+  };
+
   return (
     <div className="h-screen flex flex-col bg-[hsl(var(--editor-bg))]">
       {selectedTemplate && fabricCanvas && (
-        <Toolbar fabricCanvas={fabricCanvas} />
+        <Toolbar 
+          fabricCanvas={fabricCanvas} 
+          currentTemplate={selectedTemplate}
+          onTemplateChange={handleTemplateChange}
+        />
       )}
       
       <div className="flex-1 flex overflow-hidden">

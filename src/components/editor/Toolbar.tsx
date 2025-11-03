@@ -27,17 +27,49 @@ import {
   Home,
   Palette,
   MoveVertical,
+  Maximize2,
+  Facebook,
+  Instagram,
+  Linkedin,
+  Twitter,
+  Youtube,
+  Smartphone,
 } from "lucide-react";
 import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ExportDialog from "./ExportDialog";
+import type { TemplateSize } from "@/pages/Editor";
+
+type TemplateOption = {
+  name: string;
+  width: number;
+  height: number;
+  platform: string;
+};
+
+const templates: TemplateOption[] = [
+  { name: "Instagram Post", width: 1080, height: 1080, platform: "Instagram" },
+  { name: "Instagram Story", width: 1080, height: 1920, platform: "Instagram" },
+  { name: "Facebook Post", width: 1200, height: 630, platform: "Facebook" },
+  { name: "Facebook Story", width: 1080, height: 1920, platform: "Facebook" },
+  { name: "WhatsApp Status", width: 1080, height: 1920, platform: "WhatsApp" },
+  { name: "Twitter Post", width: 1600, height: 900, platform: "Twitter" },
+  { name: "Twitter Header", width: 1500, height: 500, platform: "Twitter" },
+  { name: "LinkedIn Post", width: 1200, height: 627, platform: "LinkedIn" },
+  { name: "LinkedIn Cover", width: 1584, height: 396, platform: "LinkedIn" },
+  { name: "YouTube Thumbnail", width: 1280, height: 720, platform: "YouTube" },
+  { name: "Pinterest Pin", width: 1000, height: 1500, platform: "Pinterest" },
+  { name: "Threads Post", width: 1080, height: 1350, platform: "Threads" },
+];
 
 type Props = {
   fabricCanvas: FabricCanvas;
+  currentTemplate: TemplateSize;
+  onTemplateChange: (template: TemplateSize) => void;
 };
 
-const Toolbar = ({ fabricCanvas }: Props) => {
+const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => {
   const navigate = useNavigate();
   const [textColor, setTextColor] = useState("#000000");
   const [backgroundColor, setBackgroundColor] = useState("#ffffff");
@@ -246,6 +278,50 @@ const Toolbar = ({ fabricCanvas }: Props) => {
           <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <Home className="w-4 h-4" />
           </Button>
+
+          <div className="w-px h-6 bg-border" />
+
+          {/* Canvas Size Selector */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="sm" className="gap-2">
+                <Maximize2 className="w-4 h-4" />
+                <span className="text-xs hidden sm:inline">
+                  {currentTemplate.width} × {currentTemplate.height}
+                </span>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64">
+              <div className="space-y-2">
+                <Label>Canvas Size</Label>
+                <Select 
+                  value={`${currentTemplate.width}x${currentTemplate.height}`}
+                  onValueChange={(value) => {
+                    const template = templates.find(
+                      t => `${t.width}x${t.height}` === value
+                    );
+                    if (template) {
+                      onTemplateChange(template);
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {templates.map((template) => (
+                      <SelectItem 
+                        key={template.name} 
+                        value={`${template.width}x${template.height}`}
+                      >
+                        {template.name} ({template.width} × {template.height})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </PopoverContent>
+          </Popover>
 
           <div className="w-px h-6 bg-border" />
 
