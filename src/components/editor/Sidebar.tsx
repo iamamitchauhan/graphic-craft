@@ -19,7 +19,7 @@ const Sidebar = ({ fabricCanvas }: Props) => {
       height: 100,
       cornerStyle: "circle",
       stroke: "#000000",
-      strokeWidth: 0,
+      strokeWidth: 2,
     });
     fabricCanvas.add(rect);
     fabricCanvas.setActiveObject(rect);
@@ -35,7 +35,7 @@ const Sidebar = ({ fabricCanvas }: Props) => {
       radius: 75,
       cornerStyle: "circle",
       stroke: "#000000",
-      strokeWidth: 0,
+      strokeWidth: 2,
     });
     fabricCanvas.add(circle);
     fabricCanvas.setActiveObject(circle);
@@ -52,7 +52,7 @@ const Sidebar = ({ fabricCanvas }: Props) => {
       height: 130,
       cornerStyle: "circle",
       stroke: "#000000",
-      strokeWidth: 0,
+      strokeWidth: 2,
     });
     fabricCanvas.add(triangle);
     fabricCanvas.setActiveObject(triangle);
