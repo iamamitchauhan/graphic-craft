@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Line, FabricObject } from "fabric";
+import { Canvas as FabricCanvas, Line, FabricObject, IText } from "fabric";
 import type { TemplateSize } from "@/pages/Editor";
 import { toast } from "sonner";
 
@@ -181,6 +181,17 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
 
     canvas.on("object:modified", clearGuideLines);
     canvas.on("selection:cleared", clearGuideLines);
+
+    // Enable text editing on double-click
+    canvas.on("mouse:dblclick", (e) => {
+      const target = e.target;
+      if (target && target.type === "i-text") {
+        const textObj = target as IText;
+        textObj.enterEditing();
+        textObj.selectAll();
+        canvas.renderAll();
+      }
+    });
 
     // Handle delete key
     const handleKeyDown = (e: KeyboardEvent) => {

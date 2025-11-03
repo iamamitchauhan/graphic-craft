@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Square, Circle, Triangle, Type, Image as ImageIcon } from "lucide-react";
-import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, FabricText, FabricImage } from "fabric";
+import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, IText, FabricImage } from "fabric";
 import { toast } from "sonner";
 
 type Props = {
@@ -62,7 +62,7 @@ const Sidebar = ({ fabricCanvas }: Props) => {
     };
 
     const config = configs[preset];
-    const text = new FabricText(config.text, {
+    const text = new IText(config.text, {
       left: 100,
       top: 100,
       fontSize: config.fontSize,

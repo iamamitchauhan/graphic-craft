@@ -45,7 +45,7 @@ const Toolbar = ({ fabricCanvas }: Props) => {
 
   const handleTextStyle = (style: "bold" | "italic" | "underline") => {
     const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject && activeObject.type === "text") {
+    if (activeObject && activeObject.type === "i-text") {
       const currentValue = activeObject.get(style === "underline" ? "underline" : style === "bold" ? "fontWeight" : "fontStyle");
       
       if (style === "bold") {
@@ -136,7 +136,7 @@ const Toolbar = ({ fabricCanvas }: Props) => {
   const handleTextColorChange = (color: string) => {
     setTextColor(color);
     const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject && activeObject.type === "text") {
+    if (activeObject && activeObject.type === "i-text") {
       activeObject.set("fill", color);
       fabricCanvas.renderAll();
     }
@@ -145,7 +145,7 @@ const Toolbar = ({ fabricCanvas }: Props) => {
   const handleFontSizeChange = (size: string) => {
     setFontSize(size);
     const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject && activeObject.type === "text") {
+    if (activeObject && activeObject.type === "i-text") {
       activeObject.set("fontSize", parseInt(size));
       fabricCanvas.renderAll();
     }
@@ -154,7 +154,7 @@ const Toolbar = ({ fabricCanvas }: Props) => {
   const handleFontFamilyChange = (family: string) => {
     setFontFamily(family);
     const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject && activeObject.type === "text") {
+    if (activeObject && activeObject.type === "i-text") {
       activeObject.set("fontFamily", family);
       fabricCanvas.renderAll();
     }
