@@ -28,8 +28,8 @@ import {
   Palette,
   MoveVertical,
 } from "lucide-react";
-import { Canvas as FabricCanvas, FabricImage } from "fabric";
-import { useState } from "react";
+import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ExportDialog from "./ExportDialog";
 
@@ -47,6 +47,32 @@ const Toolbar = ({ fabricCanvas }: Props) => {
   const [fillColor, setFillColor] = useState("#3b82f6");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState("0");
+
+  // Update controls when selection changes
+  useEffect(() => {
+    const updateControls = () => {
+      const activeObject = fabricCanvas.getActiveObject();
+      if (activeObject && activeObject.type === "i-text") {
+        const textObj = activeObject as IText;
+        setTextColor((textObj.fill as string) || "#000000");
+        setFontSize(String(textObj.fontSize || 24));
+        setFontFamily(textObj.fontFamily || "Arial");
+      }
+      if (activeObject) {
+        setFillColor((activeObject.fill as string) || "#3b82f6");
+        setStrokeColor((activeObject.stroke as string) || "#000000");
+        setStrokeWidth(String(activeObject.strokeWidth || 0));
+      }
+    };
+
+    fabricCanvas.on("selection:created", updateControls);
+    fabricCanvas.on("selection:updated", updateControls);
+
+    return () => {
+      fabricCanvas.off("selection:created", updateControls);
+      fabricCanvas.off("selection:updated", updateControls);
+    };
+  }, [fabricCanvas]);
 
   const handleTextStyle = (style: "bold" | "italic" | "underline") => {
     const activeObject = fabricCanvas.getActiveObject();
