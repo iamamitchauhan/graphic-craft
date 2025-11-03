@@ -131,13 +131,22 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       if (alignment === "left") {
-        activeObject.set({ left: 50 });
+        activeObject.set({ 
+          left: 50,
+          originX: "left"
+        });
       } else if (alignment === "center") {
-        activeObject.set({ left: (fabricCanvas.width || 0) / 2 });
-        activeObject.setCoords();
+        activeObject.set({ 
+          left: (fabricCanvas.width || 0) / 2,
+          originX: "center"
+        });
       } else {
-        activeObject.set({ left: (fabricCanvas.width || 0) - 50 });
+        activeObject.set({ 
+          left: (fabricCanvas.width || 0) - 50,
+          originX: "right"
+        });
       }
+      activeObject.setCoords();
       fabricCanvas.renderAll();
     }
   };
@@ -146,11 +155,20 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       if (alignment === "top") {
-        activeObject.set({ top: 50 });
+        activeObject.set({ 
+          top: 50,
+          originY: "top"
+        });
       } else if (alignment === "middle") {
-        activeObject.set({ top: (fabricCanvas.height || 0) / 2 });
+        activeObject.set({ 
+          top: (fabricCanvas.height || 0) / 2,
+          originY: "center"
+        });
       } else {
-        activeObject.set({ top: (fabricCanvas.height || 0) - 50 });
+        activeObject.set({ 
+          top: (fabricCanvas.height || 0) - 50,
+          originY: "bottom"
+        });
       }
       activeObject.setCoords();
       fabricCanvas.renderAll();
