@@ -1,8 +1,8 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Square, Circle, Triangle, Type, Image as ImageIcon } from "lucide-react";
-import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, IText, FabricImage } from "fabric";
+import { Square, Circle, Triangle, Type, Image as ImageIcon, Minus, ArrowRight } from "lucide-react";
+import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, IText, FabricImage, Line } from "fabric";
 import { toast } from "sonner";
 
 type Props = {
@@ -58,6 +58,37 @@ const Sidebar = ({ fabricCanvas }: Props) => {
     fabricCanvas.setActiveObject(triangle);
     fabricCanvas.renderAll();
     toast.success("Triangle added");
+  };
+
+  const addLine = (type: "solid" | "dashed" | "arrow") => {
+    const line = new Line([100, 100, 300, 100], {
+      stroke: "#000000",
+      strokeWidth: 3,
+      cornerStyle: "circle",
+    });
+
+    if (type === "dashed") {
+      line.strokeDashArray = [10, 5];
+    } else if (type === "arrow") {
+      line.strokeLineCap = "round";
+      // Create arrow head using a triangle
+      const arrowHead = new FabricTriangle({
+        left: 300,
+        top: 100,
+        fill: "#000000",
+        width: 15,
+        height: 15,
+        angle: 90,
+        originX: "center",
+        originY: "center",
+      });
+      fabricCanvas.add(arrowHead);
+    }
+
+    fabricCanvas.add(line);
+    fabricCanvas.setActiveObject(line);
+    fabricCanvas.renderAll();
+    toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} line added`);
   };
 
   const addText = (preset: "heading" | "subheading" | "body") => {
@@ -133,6 +164,37 @@ const Sidebar = ({ fabricCanvas }: Props) => {
             <Button variant="outline" onClick={addTriangle} className="h-20 flex flex-col gap-2">
               <Triangle className="w-6 h-6" />
               <span className="text-xs">Triangle</span>
+            </Button>
+          </div>
+        </div>
+
+        {/* Lines Section */}
+        <div>
+          <h3 className="font-semibold mb-3 text-foreground">Lines</h3>
+          <div className="space-y-2">
+            <Button
+              variant="outline"
+              onClick={() => addLine("solid")}
+              className="w-full justify-start"
+            >
+              <Minus className="w-4 h-4 mr-2" />
+              Solid Line
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => addLine("dashed")}
+              className="w-full justify-start"
+            >
+              <Minus className="w-4 h-4 mr-2" strokeDasharray="4 2" />
+              Dashed Line
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => addLine("arrow")}
+              className="w-full justify-start"
+            >
+              <ArrowRight className="w-4 h-4 mr-2" />
+              Arrow Line
             </Button>
           </div>
         </div>
