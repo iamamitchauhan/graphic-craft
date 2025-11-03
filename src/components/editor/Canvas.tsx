@@ -30,8 +30,10 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     });
 
     // Initialize the freeDrawingBrush
-    canvas.freeDrawingBrush.color = "#000000";
-    canvas.freeDrawingBrush.width = 2;
+    if (canvas.freeDrawingBrush) {
+      canvas.freeDrawingBrush.color = "#000000";
+      canvas.freeDrawingBrush.width = 2;
+    }
 
     // Enable object controls
     canvas.selection = true;
