@@ -39,11 +39,12 @@ import {
   Trash2,
 } from "lucide-react";
 import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ExportDialog from "./ExportDialog";
 import type { TemplateSize } from "@/pages/Editor";
 import { toast } from "@/hooks/use-toast";
+import { Upload } from "lucide-react";
 
 type TemplateOption = {
   name: string;
@@ -83,6 +84,37 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   const [fillColor, setFillColor] = useState("#3b82f6");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState("0");
+  
+  // History management for undo/redo
+  const historyRef = useRef<string[]>([]);
+  const historyStepRef = useRef<number>(-1);
+  const isUndoingRef = useRef(false);
+
+  // Initialize history
+  useEffect(() => {
+    const saveState = () => {
+      if (isUndoingRef.current) return;
+      
+      const json = JSON.stringify(fabricCanvas.toJSON());
+      historyStepRef.current++;
+      historyRef.current[historyStepRef.current] = json;
+      historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
+    };
+
+    // Save initial state
+    saveState();
+
+    // Track changes
+    fabricCanvas.on("object:added", saveState);
+    fabricCanvas.on("object:modified", saveState);
+    fabricCanvas.on("object:removed", saveState);
+
+    return () => {
+      fabricCanvas.off("object:added", saveState);
+      fabricCanvas.off("object:modified", saveState);
+      fabricCanvas.off("object:removed", saveState);
+    };
+  }, [fabricCanvas]);
 
   // Update controls when selection changes
   useEffect(() => {
@@ -330,6 +362,67 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         fabricCanvas.renderAll();
       }
     }
+  };
+
+  const handleUndo = () => {
+    if (historyStepRef.current > 0) {
+      isUndoingRef.current = true;
+      historyStepRef.current--;
+      const state = historyRef.current[historyStepRef.current];
+      fabricCanvas.loadFromJSON(state, () => {
+        fabricCanvas.renderAll();
+        isUndoingRef.current = false;
+        toast({
+          title: "Undo",
+          description: "Action undone",
+        });
+      });
+    }
+  };
+
+  const handleRedo = () => {
+    if (historyStepRef.current < historyRef.current.length - 1) {
+      isUndoingRef.current = true;
+      historyStepRef.current++;
+      const state = historyRef.current[historyStepRef.current];
+      fabricCanvas.loadFromJSON(state, () => {
+        fabricCanvas.renderAll();
+        isUndoingRef.current = false;
+        toast({
+          title: "Redo",
+          description: "Action redone",
+        });
+      });
+    }
+  };
+
+  const handleLoadJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const jsonString = event.target?.result as string;
+        try {
+          const json = JSON.parse(jsonString);
+          fabricCanvas.loadFromJSON(json, () => {
+            fabricCanvas.renderAll();
+            toast({
+              title: "Loaded",
+              description: "Design loaded successfully",
+            });
+          });
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Invalid JSON file",
+            variant: "destructive",
+          });
+        }
+      };
+      reader.readAsText(file);
+    }
+    // Reset input
+    e.target.value = "";
   };
 
   return (
@@ -595,15 +688,44 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
 
           <div className="w-px h-6 bg-border" />
 
-          {/* Undo/Redo - Basic implementation */}
-          <Button variant="ghost" size="icon">
+          {/* Undo/Redo */}
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleUndo}
+            disabled={historyStepRef.current <= 0}
+            title="Undo"
+          >
             <Undo className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon">
+          <Button 
+            variant="ghost" 
+            size="icon"
+            onClick={handleRedo}
+            disabled={historyStepRef.current >= historyRef.current.length - 1}
+            title="Redo"
+          >
             <Redo className="w-4 h-4" />
           </Button>
 
           <div className="flex-1" />
+
+          {/* Load JSON */}
+          <label htmlFor="load-json">
+            <Button variant="outline" asChild>
+              <span className="cursor-pointer">
+                <Upload className="w-4 h-4 mr-2" />
+                Load
+              </span>
+            </Button>
+          </label>
+          <input
+            id="load-json"
+            type="file"
+            accept=".json"
+            onChange={handleLoadJSON}
+            className="hidden"
+          />
 
           {/* Export */}
           <Button onClick={() => setShowExport(true)}>
