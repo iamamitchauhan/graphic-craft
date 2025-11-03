@@ -1,12 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { Canvas as FabricCanvas, Line, FabricObject, IText, FabricImage } from "fabric";
+import { useEffect, useRef } from "react";
+import { Canvas as FabricCanvas, Line, FabricObject, IText } from "fabric";
 import type { TemplateSize } from "@/pages/Editor";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent } from "@/components/ui/popover";
-import { X } from "lucide-react";
 
 type Props = {
   template: TemplateSize;
@@ -16,10 +11,6 @@ type Props = {
 const Canvas = ({ template, onCanvasReady }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [showBackgroundPopover, setShowBackgroundPopover] = useState(false);
-  const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
-  const [backgroundColor, setBackgroundColor] = useState("#ffffff");
-  const fabricCanvasRef = useRef<FabricCanvas | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -191,20 +182,6 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     canvas.on("object:modified", clearGuideLines);
     canvas.on("selection:cleared", clearGuideLines);
 
-    // Show background options on canvas click
-    canvas.on("mouse:down", (e) => {
-      if (!e.target && e.pointer) {
-        const rect = canvasRef.current?.getBoundingClientRect();
-        if (rect) {
-          setPopoverPosition({
-            x: rect.left + (e.pointer.x || 0),
-            y: rect.top + (e.pointer.y || 0),
-          });
-          setShowBackgroundPopover(true);
-        }
-      }
-    });
-
     // Enable text editing on double-click
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
@@ -230,7 +207,6 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    fabricCanvasRef.current = canvas;
     onCanvasReady(canvas);
     toast.success(`Canvas ready: ${template.name}`);
 
@@ -240,93 +216,12 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     };
   }, [template, onCanvasReady]);
 
-  const handleBackgroundColorChange = (color: string) => {
-    setBackgroundColor(color);
-    if (fabricCanvasRef.current) {
-      fabricCanvasRef.current.backgroundColor = color;
-      fabricCanvasRef.current.renderAll();
-      toast.success("Background color updated");
-    }
-  };
-
-  const handleBackgroundImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && fabricCanvasRef.current) {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const imgUrl = event.target?.result as string;
-        const imgElement = new Image();
-        imgElement.src = imgUrl;
-        imgElement.onload = () => {
-          if (fabricCanvasRef.current) {
-            const fabricImage = new FabricImage(imgElement, {
-              scaleX: (fabricCanvasRef.current.width || 0) / imgElement.width,
-              scaleY: (fabricCanvasRef.current.height || 0) / imgElement.height,
-            });
-            fabricCanvasRef.current.backgroundImage = fabricImage;
-            fabricCanvasRef.current.renderAll();
-            toast.success("Background image set");
-            setShowBackgroundPopover(false);
-          }
-        };
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   return (
-    <>
-      <div ref={containerRef} className="w-full h-full flex items-center justify-center">
-        <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))]">
-          <canvas ref={canvasRef} />
-        </div>
+    <div ref={containerRef} className="w-full h-full flex items-center justify-center">
+      <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))]">
+        <canvas ref={canvasRef} />
       </div>
-
-      {showBackgroundPopover && (
-        <div
-          style={{
-            position: "fixed",
-            left: popoverPosition.x,
-            top: popoverPosition.y,
-            zIndex: 50,
-          }}
-        >
-          <div className="bg-popover border rounded-md shadow-md p-4 w-64">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold text-sm">Canvas Background</h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={() => setShowBackgroundPopover(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <Label>Background Color</Label>
-                <Input
-                  type="color"
-                  value={backgroundColor}
-                  onChange={(e) => handleBackgroundColorChange(e.target.value)}
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Background Image</Label>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleBackgroundImageUpload}
-                  className="mt-1"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
+    </div>
   );
 };
 
