@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useState } from "react";
-import { Facebook, Instagram, Linkedin, Twitter, Youtube, Smartphone } from "lucide-react";
+import { Facebook, Instagram, Linkedin, Twitter, Youtube, Smartphone, Image, Palette } from "lucide-react";
 import type { TemplateSize } from "@/pages/Editor";
 
 type TemplateOption = {
@@ -15,13 +15,18 @@ type TemplateOption = {
 };
 
 const templates: TemplateOption[] = [
-  { name: "Facebook Post", width: 1200, height: 630, icon: <Facebook />, platform: "Facebook" },
   { name: "Instagram Post", width: 1080, height: 1080, icon: <Instagram />, platform: "Instagram" },
   { name: "Instagram Story", width: 1080, height: 1920, icon: <Instagram />, platform: "Instagram" },
+  { name: "Facebook Post", width: 1200, height: 630, icon: <Facebook />, platform: "Facebook" },
+  { name: "Facebook Story", width: 1080, height: 1920, icon: <Facebook />, platform: "Facebook" },
   { name: "WhatsApp Status", width: 1080, height: 1920, icon: <Smartphone />, platform: "WhatsApp" },
-  { name: "Twitter Post", width: 1200, height: 675, icon: <Twitter />, platform: "Twitter" },
+  { name: "Twitter Post", width: 1600, height: 900, icon: <Twitter />, platform: "Twitter" },
+  { name: "Twitter Header", width: 1500, height: 500, icon: <Twitter />, platform: "Twitter" },
   { name: "LinkedIn Post", width: 1200, height: 627, icon: <Linkedin />, platform: "LinkedIn" },
+  { name: "LinkedIn Cover", width: 1584, height: 396, icon: <Linkedin />, platform: "LinkedIn" },
   { name: "YouTube Thumbnail", width: 1280, height: 720, icon: <Youtube />, platform: "YouTube" },
+  { name: "Pinterest Pin", width: 1000, height: 1500, icon: <Image />, platform: "Pinterest" },
+  { name: "Threads Post", width: 1080, height: 1350, icon: <Palette />, platform: "Threads" },
 ];
 
 type Props = {
