@@ -404,8 +404,31 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         const jsonString = event.target?.result as string;
         try {
           const json = JSON.parse(jsonString);
+          
+          // Clear current canvas
+          fabricCanvas.clear();
+          
+          // Load the JSON data
           fabricCanvas.loadFromJSON(json, () => {
+            // Restore background color if present
+            if (json.background) {
+              fabricCanvas.backgroundColor = json.background;
+              setBackgroundColor(json.background);
+            }
+            
+            // Restore background image if present
+            if (json.backgroundImage) {
+              fabricCanvas.backgroundImage = json.backgroundImage;
+            }
+            
             fabricCanvas.renderAll();
+            
+            // Save to history
+            const state = JSON.stringify(fabricCanvas.toJSON());
+            historyStepRef.current++;
+            historyRef.current[historyStepRef.current] = state;
+            historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
+            
             toast({
               title: "Loaded",
               description: "Design loaded successfully",

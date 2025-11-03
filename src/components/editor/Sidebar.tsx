@@ -115,54 +115,6 @@ const Sidebar = ({ fabricCanvas }: Props) => {
     toast.success("Text added - double-click to edit");
   };
 
-  const addPredefinedText = (textContent: string, fontSize: number = 24) => {
-    const text = new IText(textContent, {
-      left: 100,
-      top: 100,
-      fontSize: fontSize,
-      fill: "#000000",
-      fontFamily: "Arial",
-      editable: true,
-      editingBorderColor: "#3b82f6",
-    });
-    fabricCanvas.add(text);
-    fabricCanvas.setActiveObject(text);
-    fabricCanvas.renderAll();
-    toast.success("Text template added - double-click to edit");
-  };
-
-  const textTemplates = [
-    {
-      name: "Quote",
-      text: '"The best way to predict\nthe future is to create it."\n- Peter Drucker',
-      fontSize: 28,
-    },
-    {
-      name: "Announcement",
-      text: "🎉 BIG ANNOUNCEMENT 🎉\n\nWe're excited to share\nsomething special with you!\n\nStay tuned for more details...",
-      fontSize: 24,
-    },
-    {
-      name: "Sale Banner",
-      text: "MEGA SALE\n\nUP TO 50% OFF\n\nLimited Time Only!\nShop Now",
-      fontSize: 32,
-    },
-    {
-      name: "Event Invite",
-      text: "You're Invited!\n\nJoin us for an amazing event\n\nDate: [Your Date]\nTime: [Your Time]\nVenue: [Your Venue]",
-      fontSize: 22,
-    },
-    {
-      name: "Motivational",
-      text: "DREAM BIG\nWORK HARD\nSTAY FOCUSED\n\nSuccess is waiting for you!",
-      fontSize: 26,
-    },
-    {
-      name: "Product Launch",
-      text: "INTRODUCING\n\n[Product Name]\n\nThe future is here.\nExperience innovation like never before.",
-      fontSize: 24,
-    },
-  ];
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -372,23 +324,6 @@ const Sidebar = ({ fabricCanvas }: Props) => {
           </div>
         </div>
 
-        {/* Text Templates Section */}
-        <div>
-          <h3 className="font-semibold mb-3 text-foreground">Text Templates</h3>
-          <div className="space-y-2">
-            {textTemplates.map((template, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                onClick={() => addPredefinedText(template.text, template.fontSize)}
-                className="w-full justify-start text-left"
-              >
-                <Type className="w-4 h-4 mr-2 flex-shrink-0" />
-                <span className="truncate">{template.name}</span>
-              </Button>
-            ))}
-          </div>
-        </div>
 
         {/* Images Section */}
         <div>

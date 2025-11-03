@@ -192,6 +192,54 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     canvas.on("object:modified", clearGuideLines);
     canvas.on("selection:cleared", clearGuideLines);
 
+    // Add predefined text based on template
+    const addPredefinedText = () => {
+      let textContent = "";
+      let fontSize = 32;
+      let topPosition = template.height * 0.3;
+
+      // Customize text based on template type
+      if (template.name.includes("Instagram")) {
+        textContent = "Your Story\nStarts Here";
+        fontSize = 48;
+      } else if (template.name.includes("Facebook")) {
+        textContent = "Connect & Share\nYour Moments";
+        fontSize = 42;
+      } else if (template.name.includes("Twitter") || template.name.includes("LinkedIn")) {
+        textContent = "Make Your\nStatement";
+        fontSize = 38;
+      } else if (template.name.includes("YouTube")) {
+        textContent = "Watch Now";
+        fontSize = 52;
+      } else if (template.name.includes("WhatsApp")) {
+        textContent = "Share Your\nUpdate";
+        fontSize = 44;
+      } else {
+        textContent = "Your Design\nStarts Here";
+        fontSize = 40;
+      }
+
+      const text = new IText(textContent, {
+        left: template.width / 2,
+        top: topPosition,
+        fontSize: fontSize,
+        fontWeight: "bold",
+        fill: "#000000",
+        fontFamily: "Arial",
+        textAlign: "center",
+        originX: "center",
+        originY: "top",
+        editable: true,
+        editingBorderColor: "#3b82f6",
+      });
+
+      canvas.add(text);
+      canvas.renderAll();
+    };
+
+    // Add predefined text after canvas is ready
+    addPredefinedText();
+
     // Enable text editing on double-click
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
