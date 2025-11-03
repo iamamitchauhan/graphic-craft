@@ -19,8 +19,9 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     const container = containerRef.current;
     if (!container) return;
 
-    const maxWidth = container.clientWidth - 40;
-    const maxHeight = container.clientHeight - 40;
+    const containerPadding = 80;
+    const maxWidth = container.clientWidth - containerPadding;
+    const maxHeight = container.clientHeight - containerPadding;
     const scale = Math.min(maxWidth / template.width, maxHeight / template.height, 1);
 
     const canvas = new FabricCanvas(canvasRef.current, {
@@ -28,6 +29,15 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
       height: template.height,
       backgroundColor: "#ffffff",
     });
+
+    // Apply scaling if needed
+    if (scale < 1) {
+      canvas.setDimensions({
+        width: template.width * scale,
+        height: template.height * scale,
+      });
+      canvas.setZoom(scale);
+    }
 
     // Initialize the freeDrawingBrush
     if (canvas.freeDrawingBrush) {
@@ -217,9 +227,9 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
   }, [template, onCanvasReady]);
 
   return (
-    <div ref={containerRef} className="w-full h-full flex items-center justify-center">
-      <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))]">
-        <canvas ref={canvasRef} />
+    <div ref={containerRef} className="w-full h-full flex items-center justify-center overflow-auto p-4">
+      <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))] max-w-full max-h-full">
+        <canvas ref={canvasRef} className="max-w-full max-h-full" style={{ display: 'block' }} />
       </div>
     </div>
   );
