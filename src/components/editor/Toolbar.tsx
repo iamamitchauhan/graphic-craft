@@ -36,16 +36,14 @@ import {
   Twitter,
   Youtube,
   Smartphone,
-  Scissors,
-  Loader2,
+  Trash2,
 } from "lucide-react";
 import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ExportDialog from "./ExportDialog";
 import type { TemplateSize } from "@/pages/Editor";
-import { removeBackground } from "@/lib/backgroundRemoval";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 
 type TemplateOption = {
   name: string;
@@ -85,7 +83,6 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   const [fillColor, setFillColor] = useState("#3b82f6");
   const [strokeColor, setStrokeColor] = useState("#000000");
   const [strokeWidth, setStrokeWidth] = useState("0");
-  const [isRemovingBackground, setIsRemovingBackground] = useState(false);
 
   // Update controls when selection changes
   useEffect(() => {
@@ -192,82 +189,15 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     }
   };
 
-  const handleRemoveBackground = async () => {
-    const activeObject = fabricCanvas.getActiveObject();
-    if (!activeObject || activeObject.type !== 'image') {
-      toast.error('Please select an image first');
-      return;
-    }
-
-    setIsRemovingBackground(true);
-    toast.info('Removing background... This may take a moment');
-
-    try {
-      const fabricImage = activeObject as FabricImage;
-      const imgElement = fabricImage.getElement() as HTMLImageElement;
-      
-      // Create a temporary canvas to get the image data
-      const tempCanvas = document.createElement('canvas');
-      tempCanvas.width = imgElement.naturalWidth || imgElement.width;
-      tempCanvas.height = imgElement.naturalHeight || imgElement.height;
-      const tempCtx = tempCanvas.getContext('2d');
-      
-      if (!tempCtx) {
-        throw new Error('Could not get canvas context');
-      }
-      
-      tempCtx.drawImage(imgElement, 0, 0);
-      
-      // Convert to blob
-      const blob = await new Promise<Blob>((resolve, reject) => {
-        tempCanvas.toBlob((b) => {
-          if (b) resolve(b);
-          else reject(new Error('Failed to create blob'));
-        }, 'image/png');
-      });
-
-      // Create a new image element for processing
-      const processImg = new Image();
-      processImg.crossOrigin = 'anonymous';
-      
-      await new Promise((resolve, reject) => {
-        processImg.onload = resolve;
-        processImg.onerror = reject;
-        processImg.src = URL.createObjectURL(blob);
-      });
-
-      // Remove background
-      const resultBlob = await removeBackground(processImg);
-      
-      // Create new image with transparent background
-      const newImgElement = new Image();
-      await new Promise((resolve, reject) => {
-        newImgElement.onload = resolve;
-        newImgElement.onerror = reject;
-        newImgElement.src = URL.createObjectURL(resultBlob);
-      });
-
-      // Replace the image in canvas
-      const newFabricImage = new FabricImage(newImgElement, {
-        left: fabricImage.left,
-        top: fabricImage.top,
-        scaleX: fabricImage.scaleX,
-        scaleY: fabricImage.scaleY,
-        angle: fabricImage.angle,
-      });
-
-      fabricCanvas.remove(fabricImage);
-      fabricCanvas.add(newFabricImage);
-      fabricCanvas.setActiveObject(newFabricImage);
-      fabricCanvas.renderAll();
-
-      toast.success('Background removed successfully!');
-    } catch (error) {
-      console.error('Background removal error:', error);
-      toast.error('Failed to remove background. Please try again.');
-    } finally {
-      setIsRemovingBackground(false);
-    }
+  const handleClearBackground = () => {
+    fabricCanvas.backgroundImage = undefined;
+    fabricCanvas.backgroundColor = "#ffffff";
+    setBackgroundColor("#ffffff");
+    fabricCanvas.renderAll();
+    toast({
+      title: "Background cleared",
+      description: "Canvas background has been reset",
+    });
   };
 
   const handleBackgroundColor = (color: string) => {
@@ -505,6 +435,15 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
                   <Label>Background Image</Label>
                   <Input type="file" accept="image/*" onChange={handleBackgroundImage} />
                 </div>
+                <Button 
+                  variant="destructive" 
+                  size="sm" 
+                  onClick={handleClearBackground}
+                  className="w-full"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear Background
+                </Button>
               </div>
             </PopoverContent>
           </Popover>
@@ -609,21 +548,6 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             title="Send to back"
           >
             <ChevronsDown className="w-4 h-4" />
-          </Button>
-
-          {/* Remove Background */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={handleRemoveBackground}
-            disabled={isRemovingBackground}
-            title="Remove background from image"
-          >
-            {isRemovingBackground ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Scissors className="w-4 h-4" />
-            )}
           </Button>
 
           <div className="w-px h-6 bg-border" />
