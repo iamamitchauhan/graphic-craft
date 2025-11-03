@@ -89,6 +89,8 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   const historyRef = useRef<string[]>([]);
   const historyStepRef = useRef<number>(-1);
   const isUndoingRef = useRef(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const lastBackgroundRef = useRef<string>("");
 
   // Initialize history
   useEffect(() => {
@@ -96,23 +98,42 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       if (isUndoingRef.current) return;
       
       const json = JSON.stringify(fabricCanvas.toJSON());
+      
+      // Avoid duplicate states
+      const lastState = historyRef.current[historyStepRef.current];
+      if (lastState === json) return;
+      
       historyStepRef.current++;
       historyRef.current[historyStepRef.current] = json;
       historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
     };
 
+    const debouncedSaveState = () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+      saveTimeoutRef.current = setTimeout(() => {
+        saveState();
+      }, 300); // Debounce for 300ms to avoid saving every pixel movement
+    };
+
     // Save initial state
     saveState();
 
-    // Track changes
-    fabricCanvas.on("object:added", saveState);
-    fabricCanvas.on("object:modified", saveState);
-    fabricCanvas.on("object:removed", saveState);
+    // Track meaningful changes
+    fabricCanvas.on("object:added", saveState); // Immediate save for additions
+    fabricCanvas.on("object:removed", saveState); // Immediate save for deletions
+    fabricCanvas.on("object:modified", debouncedSaveState); // Debounced for modifications (resize, move, rotate)
+    fabricCanvas.on("text:changed", debouncedSaveState); // Track text content changes
 
     return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
       fabricCanvas.off("object:added", saveState);
-      fabricCanvas.off("object:modified", saveState);
       fabricCanvas.off("object:removed", saveState);
+      fabricCanvas.off("object:modified", debouncedSaveState);
+      fabricCanvas.off("text:changed", debouncedSaveState);
     };
   }, [fabricCanvas]);
 
@@ -156,6 +177,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       }
       
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save text style change
     }
   };
 
@@ -207,11 +229,24 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     }
   };
 
+  const saveStateToHistory = () => {
+    if (isUndoingRef.current) return;
+    
+    const json = JSON.stringify(fabricCanvas.toJSON());
+    const lastState = historyRef.current[historyStepRef.current];
+    if (lastState === json) return;
+    
+    historyStepRef.current++;
+    historyRef.current[historyStepRef.current] = json;
+    historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
+  };
+
   const handleBringForward = () => {
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       fabricCanvas.bringObjectForward(activeObject);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save layer change
     }
   };
 
@@ -220,6 +255,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject) {
       fabricCanvas.sendObjectBackwards(activeObject);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save layer change
     }
   };
 
@@ -228,6 +264,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject) {
       fabricCanvas.bringObjectToFront(activeObject);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save layer change
     }
   };
 
@@ -236,6 +273,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject) {
       fabricCanvas.sendObjectToBack(activeObject);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save layer change
     }
   };
 
@@ -254,6 +292,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     setBackgroundColor(color);
     fabricCanvas.backgroundColor = color;
     fabricCanvas.renderAll();
+    
+    // Track background change
+    if (lastBackgroundRef.current !== color) {
+      lastBackgroundRef.current = color;
+      saveStateToHistory();
+    }
   };
 
   const handleBackgroundImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -271,6 +315,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
           });
           fabricCanvas.backgroundImage = fabricImage;
           fabricCanvas.renderAll();
+          saveStateToHistory(); // Save background image change
         };
       };
       reader.readAsDataURL(file);
@@ -283,6 +328,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject && activeObject.type === "i-text") {
       activeObject.set("fill", color);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save text color change
     }
   };
 
@@ -292,6 +338,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject && activeObject.type === "i-text") {
       activeObject.set("fontSize", parseInt(size));
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save font size change
     }
   };
 
@@ -301,6 +348,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject && activeObject.type === "i-text") {
       activeObject.set("fontFamily", family);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save font family change
     }
   };
 
@@ -310,6 +358,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject) {
       activeObject.set("fill", color);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save fill color change
     }
   };
 
@@ -319,6 +368,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject) {
       activeObject.set("stroke", color);
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save stroke color change
     }
   };
 
@@ -328,6 +378,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     if (activeObject) {
       activeObject.set("strokeWidth", parseInt(width));
       fabricCanvas.renderAll();
+      saveStateToHistory(); // Save stroke width change
     }
   };
 
