@@ -1,11 +1,68 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { Palette, Sparkles, Share2, Zap } from "lucide-react";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
+      <div className="container mx-auto px-4 py-16">
+        {/* Header */}
+        <header className="text-center mb-16">
+          <div className="inline-flex items-center gap-2 mb-6">
+            <Palette className="w-10 h-10 text-primary" />
+            <h1 className="text-4xl font-bold text-foreground">Poster Creator</h1>
+          </div>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Design stunning posters for all your social media platforms. Professional tools, zero learning curve.
+          </p>
+        </header>
+
+        {/* Hero CTA */}
+        <div className="text-center mb-20">
+          <Button
+            size="lg"
+            onClick={() => navigate("/editor")}
+            className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          >
+            <Sparkles className="w-5 h-5 mr-2" />
+            Create Design
+          </Button>
+        </div>
+
+        {/* Features */}
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+              <Share2 className="w-6 h-6 text-primary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-card-foreground">Multi-Platform Ready</h3>
+            <p className="text-muted-foreground">
+              Pre-configured templates for Instagram, Facebook, Twitter, LinkedIn, and more.
+            </p>
+          </div>
+
+          <div className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-secondary/10 rounded-lg flex items-center justify-center mb-4">
+              <Palette className="w-6 h-6 text-secondary" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-card-foreground">Full Creative Control</h3>
+            <p className="text-muted-foreground">
+              Add text, shapes, images, and customize every element with intuitive tools.
+            </p>
+          </div>
+
+          <div className="bg-card rounded-xl p-6 shadow-sm border border-border hover:shadow-md transition-shadow">
+            <div className="w-12 h-12 bg-accent/10 rounded-lg flex items-center justify-center mb-4">
+              <Zap className="w-6 h-6 text-accent" />
+            </div>
+            <h3 className="text-lg font-semibold mb-2 text-card-foreground">Export Instantly</h3>
+            <p className="text-muted-foreground">
+              Download your designs as high-quality PNG or JPG files in seconds.
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
