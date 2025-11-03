@@ -25,6 +25,8 @@ import {
   Download,
   Image as ImageIcon,
   Home,
+  Palette,
+  MoveVertical,
 } from "lucide-react";
 import { Canvas as FabricCanvas, FabricImage } from "fabric";
 import { useState } from "react";
@@ -42,6 +44,9 @@ const Toolbar = ({ fabricCanvas }: Props) => {
   const [fontSize, setFontSize] = useState("24");
   const [fontFamily, setFontFamily] = useState("Arial");
   const [showExport, setShowExport] = useState(false);
+  const [fillColor, setFillColor] = useState("#3b82f6");
+  const [strokeColor, setStrokeColor] = useState("#000000");
+  const [strokeWidth, setStrokeWidth] = useState("0");
 
   const handleTextStyle = (style: "bold" | "italic" | "underline") => {
     const activeObject = fabricCanvas.getActiveObject();
@@ -160,6 +165,53 @@ const Toolbar = ({ fabricCanvas }: Props) => {
     }
   };
 
+  const handleFillColorChange = (color: string) => {
+    setFillColor(color);
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject) {
+      activeObject.set("fill", color);
+      fabricCanvas.renderAll();
+    }
+  };
+
+  const handleStrokeColorChange = (color: string) => {
+    setStrokeColor(color);
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject) {
+      activeObject.set("stroke", color);
+      fabricCanvas.renderAll();
+    }
+  };
+
+  const handleStrokeWidthChange = (width: string) => {
+    setStrokeWidth(width);
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject) {
+      activeObject.set("strokeWidth", parseInt(width));
+      fabricCanvas.renderAll();
+    }
+  };
+
+  const handleCenterTextOnShape = () => {
+    const activeObjects = fabricCanvas.getActiveObjects();
+    if (activeObjects.length === 2) {
+      const textObj = activeObjects.find(obj => obj.type === "i-text");
+      const shapeObj = activeObjects.find(obj => obj.type !== "i-text");
+      
+      if (textObj && shapeObj) {
+        const shapeCenter = shapeObj.getCenterPoint();
+        textObj.set({
+          left: shapeCenter.x,
+          top: shapeCenter.y,
+          originX: "center",
+          originY: "center",
+        });
+        textObj.setCoords();
+        fabricCanvas.renderAll();
+      }
+    }
+  };
+
   return (
     <>
       <div className="bg-[hsl(var(--toolbar-bg))] border-b border-border px-4 py-3">
@@ -253,6 +305,56 @@ const Toolbar = ({ fabricCanvas }: Props) => {
               </div>
             </PopoverContent>
           </Popover>
+
+          <div className="w-px h-6 bg-border" />
+
+          {/* Shape Styling */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Palette className="w-4 h-4" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80">
+              <div className="space-y-4">
+                <div>
+                  <Label>Fill Color</Label>
+                  <Input
+                    type="color"
+                    value={fillColor}
+                    onChange={(e) => handleFillColorChange(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Stroke Color</Label>
+                  <Input
+                    type="color"
+                    value={strokeColor}
+                    onChange={(e) => handleStrokeColorChange(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <Label>Stroke Width</Label>
+                  <Input
+                    type="number"
+                    value={strokeWidth}
+                    onChange={(e) => handleStrokeWidthChange(e.target.value)}
+                    min="0"
+                    max="50"
+                  />
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleCenterTextOnShape}
+            title="Center text on shape (select both)"
+          >
+            <MoveVertical className="w-4 h-4" />
+          </Button>
 
           <div className="w-px h-6 bg-border" />
 
