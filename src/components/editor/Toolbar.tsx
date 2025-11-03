@@ -137,12 +137,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         });
       } else if (alignment === "center") {
         activeObject.set({ 
-          left: (fabricCanvas.width || 0) / 2,
+          left: currentTemplate.width / 2,
           originX: "center"
         });
       } else {
         activeObject.set({ 
-          left: (fabricCanvas.width || 0) - 50,
+          left: currentTemplate.width - 50,
           originX: "right"
         });
       }
@@ -161,12 +161,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         });
       } else if (alignment === "middle") {
         activeObject.set({ 
-          top: (fabricCanvas.height || 0) / 2,
+          top: currentTemplate.height / 2,
           originY: "center"
         });
       } else {
         activeObject.set({ 
-          top: (fabricCanvas.height || 0) - 50,
+          top: currentTemplate.height - 50,
           originY: "bottom"
         });
       }
