@@ -299,6 +299,19 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     }
   };
 
+  const handleDelete = () => {
+    const activeObjects = fabricCanvas.getActiveObjects();
+    if (activeObjects.length) {
+      activeObjects.forEach((obj) => fabricCanvas.remove(obj));
+      fabricCanvas.discardActiveObject();
+      fabricCanvas.renderAll();
+      toast({
+        title: "Deleted",
+        description: "Selected objects removed",
+      });
+    }
+  };
+
   const handleCenterTextOnShape = () => {
     const activeObjects = fabricCanvas.getActiveObjects();
     if (activeObjects.length === 2) {
@@ -566,6 +579,18 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             title="Send to back"
           >
             <ChevronsDown className="w-4 h-4" />
+          </Button>
+
+          <div className="w-px h-6 bg-border" />
+
+          {/* Delete */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleDelete}
+            title="Delete selected"
+          >
+            <Trash2 className="w-4 h-4" />
           </Button>
 
           <div className="w-px h-6 bg-border" />

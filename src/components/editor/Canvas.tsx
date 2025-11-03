@@ -86,15 +86,15 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
       const objBottom = objTop + objHeight;
 
       const canvasCenter = {
-        x: (canvas.width || 0) / 2,
-        y: (canvas.height || 0) / 2,
+        x: template.width / 2,
+        y: template.height / 2,
       };
 
       // Check canvas center alignment
       if (Math.abs(objCenter.x - canvasCenter.x) < snapThreshold) {
         obj.set({ left: canvasCenter.x - objWidth / 2 });
         const line = createGuideLine(
-          [canvasCenter.x, 0, canvasCenter.x, canvas.height || 0],
+          [canvasCenter.x, 0, canvasCenter.x, template.height],
           true
         );
         verticalLines.push(line);
@@ -104,7 +104,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
       if (Math.abs(objCenter.y - canvasCenter.y) < snapThreshold) {
         obj.set({ top: canvasCenter.y - objHeight / 2 });
         const line = createGuideLine(
-          [0, canvasCenter.y, canvas.width || 0, canvasCenter.y],
+          [0, canvasCenter.y, template.width, canvasCenter.y],
           false
         );
         horizontalLines.push(line);
@@ -127,7 +127,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         if (Math.abs(objCenter.x - otherCenter.x) < snapThreshold) {
           obj.set({ left: otherCenter.x - objWidth / 2 });
           const line = createGuideLine(
-            [otherCenter.x, 0, otherCenter.x, canvas.height || 0],
+            [otherCenter.x, 0, otherCenter.x, template.height],
             true
           );
           verticalLines.push(line);
@@ -137,7 +137,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         if (Math.abs(objLeft - otherLeft) < snapThreshold) {
           obj.set({ left: otherLeft });
           const line = createGuideLine(
-            [otherLeft, 0, otherLeft, canvas.height || 0],
+            [otherLeft, 0, otherLeft, template.height],
             true
           );
           verticalLines.push(line);
@@ -147,7 +147,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         if (Math.abs(objRight - otherRight) < snapThreshold) {
           obj.set({ left: otherRight - objWidth });
           const line = createGuideLine(
-            [otherRight, 0, otherRight, canvas.height || 0],
+            [otherRight, 0, otherRight, template.height],
             true
           );
           verticalLines.push(line);
@@ -158,7 +158,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         if (Math.abs(objCenter.y - otherCenter.y) < snapThreshold) {
           obj.set({ top: otherCenter.y - objHeight / 2 });
           const line = createGuideLine(
-            [0, otherCenter.y, canvas.width || 0, otherCenter.y],
+            [0, otherCenter.y, template.width, otherCenter.y],
             false
           );
           horizontalLines.push(line);
@@ -168,7 +168,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         if (Math.abs(objTop - otherTop) < snapThreshold) {
           obj.set({ top: otherTop });
           const line = createGuideLine(
-            [0, otherTop, canvas.width || 0, otherTop],
+            [0, otherTop, template.width, otherTop],
             false
           );
           horizontalLines.push(line);
@@ -178,7 +178,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         if (Math.abs(objBottom - otherBottom) < snapThreshold) {
           obj.set({ top: otherBottom - objHeight });
           const line = createGuideLine(
-            [0, otherBottom, canvas.width || 0, otherBottom],
+            [0, otherBottom, template.width, otherBottom],
             false
           );
           horizontalLines.push(line);
@@ -203,9 +203,9 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
       }
     });
 
-    // Handle delete key
+    // Handle delete key (only Delete, not Backspace)
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Delete" || e.key === "Backspace") {
+      if (e.key === "Delete") {
         const activeObjects = canvas.getActiveObjects();
         if (activeObjects.length) {
           activeObjects.forEach((obj) => canvas.remove(obj));
