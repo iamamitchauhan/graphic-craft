@@ -182,7 +182,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     canvas.on("object:modified", clearGuideLines);
     canvas.on("selection:cleared", clearGuideLines);
 
-    // Enable text editing on double-click
+    // Enable text editing on double-click, or add text to shapes
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
       if (target && target.type === "i-text") {
@@ -190,6 +190,27 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
         textObj.enterEditing();
         textObj.selectAll();
         canvas.renderAll();
+      } else if (target && target.type !== "i-text") {
+        // Add text to shape
+        const center = target.getCenterPoint();
+        const text = new IText("Text", {
+          left: center.x,
+          top: center.y,
+          fontSize: 24,
+          fontWeight: "normal",
+          fill: "#000000",
+          fontFamily: "Arial",
+          editable: true,
+          editingBorderColor: "#3b82f6",
+          originX: "center",
+          originY: "center",
+        });
+        canvas.add(text);
+        canvas.setActiveObject(text);
+        text.enterEditing();
+        text.selectAll();
+        canvas.renderAll();
+        toast.success("Text added - edit now");
       }
     });
 
