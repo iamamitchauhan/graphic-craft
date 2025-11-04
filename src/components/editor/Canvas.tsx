@@ -238,7 +238,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
     };
 
     // Add predefined text after canvas is ready
-    addPredefinedText();
+    // addPredefinedText();
 
     // Enable text editing on double-click
     canvas.on("mouse:dblclick", (e) => {
