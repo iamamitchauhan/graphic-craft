@@ -37,6 +37,8 @@ import {
   Youtube,
   Smartphone,
   Trash2,
+  List,
+  ListOrdered,
 } from "lucide-react";
 import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
 import { useState, useEffect, useRef } from "react";
@@ -178,6 +180,62 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       
       fabricCanvas.renderAll();
       saveStateToHistory(); // Save text style change
+    }
+  };
+
+  const handleBulletList = () => {
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject && activeObject.type === "i-text") {
+      const textObj = activeObject as IText;
+      const text = textObj.text || "";
+      const lines = text.split("\n");
+      
+      // Check if already has bullets
+      const hasBullets = lines.every(line => line.trim().startsWith("•") || line.trim() === "");
+      
+      if (hasBullets) {
+        // Remove bullets
+        const newText = lines.map(line => line.replace(/^•\s*/, "")).join("\n");
+        textObj.set("text", newText);
+      } else {
+        // Add bullets
+        const newText = lines.map(line => line.trim() ? `• ${line.trim()}` : "").join("\n");
+        textObj.set("text", newText);
+      }
+      
+      fabricCanvas.renderAll();
+      saveStateToHistory();
+    }
+  };
+
+  const handleNumberedList = () => {
+    const activeObject = fabricCanvas.getActiveObject();
+    if (activeObject && activeObject.type === "i-text") {
+      const textObj = activeObject as IText;
+      const text = textObj.text || "";
+      const lines = text.split("\n");
+      
+      // Check if already has numbers
+      const hasNumbers = lines.every(line => /^\d+\.\s/.test(line.trim()) || line.trim() === "");
+      
+      if (hasNumbers) {
+        // Remove numbers
+        const newText = lines.map(line => line.replace(/^\d+\.\s*/, "")).join("\n");
+        textObj.set("text", newText);
+      } else {
+        // Add numbers
+        let counter = 1;
+        const newText = lines.map(line => {
+          if (line.trim()) {
+            return `${counter++}. ${line.trim()}`;
+          }
+          return "";
+        }).join("\n");
+        textObj.set("text", newText);
+      }
+      
+      fabricCanvas.renderAll();
+      saveStateToHistory();
     }
   };
 
@@ -643,6 +701,22 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
           </Button>
           <Button variant="ghost" size="icon" onClick={() => handleTextStyle("underline")}>
             <Underline className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleBulletList}
+            title="Bullet list"
+          >
+            <List className="w-4 h-4" />
+          </Button>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={handleNumberedList}
+            title="Numbered list"
+          >
+            <ListOrdered className="w-4 h-4" />
           </Button>
 
           <div className="w-px h-6 bg-border" />
