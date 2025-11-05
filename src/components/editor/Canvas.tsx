@@ -275,9 +275,9 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
   }, [template, onCanvasReady]);
 
   return (
-    <div ref={containerRef} className="w-full h-full flex items-center justify-center overflow-auto p-4">
-      <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))] max-w-full max-h-full">
-        <canvas ref={canvasRef} className="max-w-full max-h-full" style={{ display: 'block' }} />
+    <div ref={containerRef} className="w-full h-full flex items-center justify-center p-2 sm:p-4">
+      <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))]">
+        <canvas ref={canvasRef} style={{ display: 'block' }} />
       </div>
     </div>
   );
