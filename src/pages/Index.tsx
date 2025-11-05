@@ -1,11 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { Palette, Sparkles, Share2, Zap } from "lucide-react";
-import { useState } from "react";
-import Editor from "./Editor";
 
 const Index = () => {
-  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const navigate = useNavigate();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
@@ -25,7 +23,7 @@ const Index = () => {
         <div className="text-center mb-20">
           <Button
             size="lg"
-            onClick={() => setIsEditorOpen(true)}
+            onClick={() => navigate("/editor")}
             className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <Sparkles className="w-5 h-5 mr-2" />
@@ -66,13 +64,6 @@ const Index = () => {
           </div>
         </div>
       </div>
-
-      {/* Editor Modal */}
-      <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-        <DialogContent className="max-w-[95vw] w-full h-[95vh] p-0 gap-0">
-          <Editor />
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };
