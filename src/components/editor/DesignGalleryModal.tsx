@@ -22,18 +22,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Bold Typography",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect fill='%23000000' width='400' height='400'/%3E%3Ctext x='200' y='180' text-anchor='middle' font-size='56' font-weight='bold' fill='%23ffffff' font-family='Arial'%3EMAKE IT%3C/text%3E%3Ctext x='200' y='250' text-anchor='middle' font-size='56' font-weight='bold' fill='%23fbbf24' font-family='Arial'%3EHAPPEN%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1080,
           height: 1080,
           fill: "#000000",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 400,
           width: 800,
@@ -48,6 +52,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 550,
           width: 800,
@@ -60,7 +65,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#000000"
     }),
     width: 1080,
     height: 1080,
@@ -71,18 +77,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Gradient Dream",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='711'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23667eea;stop-opacity:1'/%3E%3Cstop offset='100%25' style='stop-color:%23764ba2;stop-opacity:1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23grad)' width='400' height='711'/%3E%3Ctext x='200' y='320' text-anchor='middle' font-size='40' font-weight='300' fill='white' font-family='Georgia'%3EYour Story%3C/text%3E%3Ctext x='200' y='380' text-anchor='middle' font-size='48' font-weight='bold' fill='white' font-family='Georgia'%3EStarts Here%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1080,
           height: 1920,
           fill: "#667eea",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 800,
           width: 900,
@@ -97,6 +107,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 920,
           width: 900,
@@ -109,7 +120,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#667eea"
     }),
     width: 1080,
     height: 1920,
@@ -120,18 +132,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Minimalist Blue",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='210'%3E%3Crect fill='%233b82f6' width='400' height='210'/%3E%3Ctext x='200' y='90' text-anchor='middle' font-size='42' font-weight='300' fill='white' font-family='Helvetica'%3ESimple%3C/text%3E%3Ctext x='200' y='140' text-anchor='middle' font-size='36' font-weight='bold' fill='white' font-family='Helvetica'%3E%26 Elegant%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1200,
           height: 630,
           fill: "#3b82f6",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 600,
           top: 240,
           width: 1000,
@@ -146,6 +162,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 600,
           top: 370,
           width: 1000,
@@ -158,7 +175,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#3b82f6"
     }),
     width: 1200,
     height: 630,
@@ -169,18 +187,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Green Energy",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cdefs%3E%3ClinearGradient id='grad2' x1='0%25' y1='0%25' x2='0%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%2310b981;stop-opacity:1'/%3E%3Cstop offset='100%25' style='stop-color:%23059669;stop-opacity:1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect fill='url(%23grad2)' width='400' height='400'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='32' fill='white' font-family='Verdana'%3EBelieve in%3C/text%3E%3Ctext x='200' y='220' text-anchor='middle' font-size='64' font-weight='bold' fill='white' font-family='Verdana'%3EYourself%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1080,
           height: 1080,
           fill: "#10b981",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 420,
           width: 900,
@@ -195,6 +217,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 560,
           width: 900,
@@ -207,7 +230,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#10b981"
     }),
     width: 1080,
     height: 1080,
@@ -218,18 +242,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Red Alert",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%23ef4444' width='400' height='225'/%3E%3Ctext x='200' y='100' text-anchor='middle' font-size='52' font-weight='bold' fill='white' font-family='Impact'%3EWATCH%3C/text%3E%3Ctext x='200' y='155' text-anchor='middle' font-size='52' font-weight='bold' fill='%23fef3c7' font-family='Impact'%3ENOW%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1280,
           height: 720,
           fill: "#ef4444",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 640,
           top: 280,
           width: 1100,
@@ -244,6 +272,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 640,
           top: 450,
           width: 1100,
@@ -256,7 +285,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#ef4444"
     }),
     width: 1280,
     height: 720,
@@ -267,18 +297,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Orange Pop",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Crect fill='%23f59e0b' width='400' height='400'/%3E%3Ctext x='200' y='160' text-anchor='middle' font-size='72' font-weight='bold' fill='white' font-family='Arial'%3ENEW%3C/text%3E%3Ctext x='200' y='240' text-anchor='middle' font-size='48' fill='%23000000' font-family='Arial'%3EProduct Launch%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1080,
           height: 1080,
           fill: "#f59e0b",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 420,
           width: 900,
@@ -293,6 +327,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 540,
           top: 600,
           width: 900,
@@ -305,7 +340,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#f59e0b"
     }),
     width: 1080,
     height: 1080,
@@ -316,18 +352,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Professional Navy",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='209'%3E%3Crect fill='%230a66c2' width='400' height='209'/%3E%3Ctext x='200' y='90' text-anchor='middle' font-size='36' font-weight='300' fill='white' font-family='Times New Roman'%3EProfessional%3C/text%3E%3Ctext x='200' y='135' text-anchor='middle' font-size='40' font-weight='bold' fill='%23fbbf24' font-family='Times New Roman'%3EContent%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1200,
           height: 627,
           fill: "#0a66c2",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 600,
           top: 240,
           width: 1000,
@@ -342,6 +382,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 600,
           top: 360,
           width: 1000,
@@ -354,7 +395,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#0a66c2"
     }),
     width: 1200,
     height: 627,
@@ -365,18 +407,22 @@ const dummyTemplates: SavedDesign[] = [
     name: "Sky Blue Header",
     thumbnail: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='225'%3E%3Crect fill='%231da1f2' width='400' height='225'/%3E%3Ctext x='200' y='100' text-anchor='middle' font-size='48' font-weight='bold' fill='white' font-family='Courier New'%3EYour Brand%3C/text%3E%3Ctext x='200' y='145' text-anchor='middle' font-size='28' fill='%23ffffff' font-family='Courier New'%3EMaking waves%3C/text%3E%3C/svg%3E",
     data: JSON.stringify({
+      version: "6.0.0",
       objects: [
         {
           type: "rect",
+          version: "6.0.0",
           left: 0,
           top: 0,
           width: 1600,
           height: 900,
           fill: "#1da1f2",
-          selectable: false
+          selectable: false,
+          evented: false
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 800,
           top: 360,
           width: 1400,
@@ -391,6 +437,7 @@ const dummyTemplates: SavedDesign[] = [
         },
         {
           type: "textbox",
+          version: "6.0.0",
           left: 800,
           top: 510,
           width: 1400,
@@ -403,7 +450,8 @@ const dummyTemplates: SavedDesign[] = [
           originX: "center",
           originY: "center"
         }
-      ]
+      ],
+      background: "#1da1f2"
     }),
     width: 1600,
     height: 900,
