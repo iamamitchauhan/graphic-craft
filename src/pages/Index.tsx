@@ -54,7 +54,8 @@ const Index = () => {
 
         {/* Editor Modal */}
         <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0" aria-describedby="editor-description">
+            <span id="editor-description" className="sr-only">Design editor canvas</span>
             <Editor initialDesign={editingDesign} />
           </DialogContent>
         </Dialog>

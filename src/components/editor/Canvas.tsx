@@ -243,8 +243,12 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       try {
         const jsonData = typeof initialData === 'string' ? JSON.parse(initialData) : initialData;
         canvas.loadFromJSON(jsonData, () => {
+          // Force multiple renders to ensure visibility
           canvas.renderAll();
-          toast.success("Template loaded");
+          requestAnimationFrame(() => {
+            canvas.renderAll();
+            toast.success("Template loaded");
+          });
         });
       } catch (error) {
         console.error("Error loading design:", error);
