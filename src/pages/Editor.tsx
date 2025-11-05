@@ -21,7 +21,7 @@ const Editor = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[hsl(var(--editor-bg))]">
+    <div className="h-full flex flex-col bg-[hsl(var(--editor-bg))]">
       {selectedTemplate && fabricCanvas && (
         <Toolbar 
           fabricCanvas={fabricCanvas} 
@@ -30,12 +30,12 @@ const Editor = () => {
         />
       )}
       
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex overflow-hidden min-h-0">
         {selectedTemplate && fabricCanvas && (
           <Sidebar fabricCanvas={fabricCanvas} />
         )}
         
-        <main className="flex-1 flex items-center justify-center p-8">
+        <main className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-8 overflow-auto">
           {!selectedTemplate ? (
             <TemplateSelector onSelectTemplate={setSelectedTemplate} />
           ) : (
