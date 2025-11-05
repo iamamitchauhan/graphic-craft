@@ -238,17 +238,21 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       canvas.renderAll();
     };
 
-    // Load initial data if provided
+    // Load initial data if provided, otherwise add predefined text
     if (initialData) {
       try {
-        canvas.loadFromJSON(initialData, () => {
+        const jsonData = typeof initialData === 'string' ? JSON.parse(initialData) : initialData;
+        canvas.loadFromJSON(jsonData, () => {
           canvas.renderAll();
-          toast.success("Design loaded");
+          toast.success("Template loaded");
         });
       } catch (error) {
         console.error("Error loading design:", error);
-        toast.error("Failed to load design");
+        toast.error("Failed to load template");
+        addPredefinedText(); // Fallback to default text
       }
+    } else {
+      addPredefinedText();
     }
 
     // Enable text editing on double-click
