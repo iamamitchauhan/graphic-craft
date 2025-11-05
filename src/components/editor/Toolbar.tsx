@@ -39,6 +39,7 @@ import {
   Trash2,
   List,
   ListOrdered,
+  Save,
 } from "lucide-react";
 import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
 import { useState, useEffect, useRef } from "react";
@@ -529,6 +530,31 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     }
   };
 
+  const handleSaveDesign = () => {
+    const designData = JSON.stringify(fabricCanvas.toJSON());
+    const thumbnail = fabricCanvas.toDataURL({ format: 'png', quality: 0.5, multiplier: 0.2 });
+    
+    const design = {
+      id: Date.now().toString(),
+      name: currentTemplate.name,
+      thumbnail,
+      data: designData,
+      width: currentTemplate.width,
+      height: currentTemplate.height,
+      createdAt: Date.now(),
+    };
+
+    const saved = localStorage.getItem("posterCreatorDesigns");
+    const designs = saved ? JSON.parse(saved) : [];
+    designs.push(design);
+    localStorage.setItem("posterCreatorDesigns", JSON.stringify(designs));
+
+    toast({
+      title: "Saved",
+      description: "Design saved successfully",
+    });
+  };
+
   const handleLoadJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -909,6 +935,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             onChange={handleLoadJSON}
             className="hidden"
           />
+
+          {/* Save */}
+          <Button onClick={handleSaveDesign} variant="secondary">
+            <Save className="w-4 h-4 mr-2" />
+            Save
+          </Button>
 
           {/* Export */}
           <Button onClick={() => setShowExport(true)}>

@@ -6,9 +6,10 @@ import { toast } from "sonner";
 type Props = {
   template: TemplateSize;
   onCanvasReady: (canvas: FabricCanvas) => void;
+  initialData?: string;
 };
 
-const Canvas = ({ template, onCanvasReady }: Props) => {
+const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -237,8 +238,18 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
       canvas.renderAll();
     };
 
-    // Add predefined text after canvas is ready
-    // addPredefinedText();
+    // Load initial data if provided
+    if (initialData) {
+      try {
+        canvas.loadFromJSON(initialData, () => {
+          canvas.renderAll();
+          toast.success("Design loaded");
+        });
+      } catch (error) {
+        console.error("Error loading design:", error);
+        toast.error("Failed to load design");
+      }
+    }
 
     // Enable text editing on double-click
     canvas.on("mouse:dblclick", (e) => {
@@ -272,7 +283,7 @@ const Canvas = ({ template, onCanvasReady }: Props) => {
       window.removeEventListener("keydown", handleKeyDown);
       canvas.dispose();
     };
-  }, [template, onCanvasReady]);
+  }, [template, onCanvasReady, initialData]);
 
   return (
     <div ref={containerRef} className="w-full h-full flex items-center justify-center overflow-auto p-4">

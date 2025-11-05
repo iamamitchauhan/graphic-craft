@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import TemplateSelector from "@/components/editor/TemplateSelector";
 import Toolbar from "@/components/editor/Toolbar";
 import Sidebar from "@/components/editor/Sidebar";
@@ -11,9 +11,23 @@ export type TemplateSize = {
   height: number;
 };
 
-const Editor = () => {
+type Props = {
+  initialDesign?: any;
+};
+
+const Editor = ({ initialDesign }: Props) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSize | null>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
+
+  useEffect(() => {
+    if (initialDesign) {
+      setSelectedTemplate({
+        name: initialDesign.name,
+        width: initialDesign.width,
+        height: initialDesign.height,
+      });
+    }
+  }, [initialDesign]);
 
   const handleTemplateChange = (template: TemplateSize) => {
     setSelectedTemplate(template);
@@ -21,7 +35,7 @@ const Editor = () => {
   };
 
   return (
-    <div className="h-screen flex flex-col bg-[hsl(var(--editor-bg))]">
+    <div className="h-full flex flex-col bg-[hsl(var(--editor-bg))]">
       {selectedTemplate && fabricCanvas && (
         <Toolbar 
           fabricCanvas={fabricCanvas} 
@@ -35,13 +49,14 @@ const Editor = () => {
           <Sidebar fabricCanvas={fabricCanvas} />
         )}
         
-        <main className="flex-1 flex items-center justify-center p-8">
+        <main className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-8 overflow-auto">
           {!selectedTemplate ? (
             <TemplateSelector onSelectTemplate={setSelectedTemplate} />
           ) : (
             <Canvas
               template={selectedTemplate}
               onCanvasReady={setFabricCanvas}
+              initialData={initialDesign?.data}
             />
           )}
         </main>
