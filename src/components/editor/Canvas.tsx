@@ -243,6 +243,17 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       try {
         const jsonData = typeof initialData === 'string' ? JSON.parse(initialData) : initialData;
         canvas.loadFromJSON(jsonData, () => {
+          // Make all text objects editable after loading
+          canvas.getObjects().forEach((obj) => {
+            if (obj.type === 'i-text' || obj.type === 'text') {
+              obj.set({
+                editable: true,
+                editingBorderColor: '#3b82f6',
+                selectable: true,
+              });
+            }
+          });
+          
           // Force multiple renders to ensure visibility
           canvas.renderAll();
           requestAnimationFrame(() => {
@@ -262,11 +273,21 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     // Enable text editing on double-click
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
-      if (target && target.type === "i-text") {
+      if (target && (target.type === "i-text" || target.type === "text")) {
         const textObj = target as IText;
         textObj.enterEditing();
         textObj.selectAll();
         canvas.renderAll();
+      }
+    });
+
+    // Also enable editing on selection for better UX
+    canvas.on("selection:created", (e) => {
+      const target = e.selected?.[0];
+      if (target && (target.type === "i-text" || target.type === "text")) {
+        const textObj = target as IText;
+        // Allow immediate editing after selection
+        textObj.set({ editable: true });
       }
     });
 
