@@ -243,13 +243,14 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       try {
         const jsonData = typeof initialData === 'string' ? JSON.parse(initialData) : initialData;
         canvas.loadFromJSON(jsonData, () => {
-          // Make all text objects editable after loading
+          // Make all text objects editable after loading (handle all text types)
           canvas.getObjects().forEach((obj) => {
-            if (obj.type === 'i-text' || obj.type === 'text') {
+            if (obj.type === 'i-text' || obj.type === 'text' || obj.type === 'textbox') {
               obj.set({
                 editable: true,
                 editingBorderColor: '#3b82f6',
                 selectable: true,
+                lockScalingFlip: true,
               });
             }
           });
@@ -270,10 +271,10 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       addPredefinedText();
     }
 
-    // Enable text editing on double-click
+    // Enable text editing on double-click for all text types
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
-      if (target && (target.type === "i-text" || target.type === "text")) {
+      if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
         const textObj = target as IText;
         textObj.enterEditing();
         textObj.selectAll();
@@ -284,9 +285,8 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     // Also enable editing on selection for better UX
     canvas.on("selection:created", (e) => {
       const target = e.selected?.[0];
-      if (target && (target.type === "i-text" || target.type === "text")) {
+      if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
         const textObj = target as IText;
-        // Allow immediate editing after selection
         textObj.set({ editable: true });
       }
     });

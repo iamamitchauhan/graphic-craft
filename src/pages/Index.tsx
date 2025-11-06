@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Palette, Sparkles, Share2, Zap } from "lucide-react";
 import DesignGalleryModal from "@/components/editor/DesignGalleryModal";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import Editor from "./Editor";
 
 const Index = () => {
@@ -54,8 +54,10 @@ const Index = () => {
 
         {/* Editor Modal */}
         <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
-          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0" aria-describedby="editor-description">
-            <span id="editor-description" className="sr-only">Design editor canvas</span>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Design Editor</DialogTitle>
+            </DialogHeader>
             <Editor initialDesign={editingDesign} />
           </DialogContent>
         </Dialog>
