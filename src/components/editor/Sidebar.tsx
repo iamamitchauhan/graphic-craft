@@ -111,8 +111,11 @@ const Sidebar = ({ fabricCanvas }: Props) => {
     });
     fabricCanvas.add(text);
     fabricCanvas.setActiveObject(text);
+    // Automatically enter editing mode so user can type immediately
+    text.enterEditing();
+    text.selectAll();
     fabricCanvas.renderAll();
-    toast.success("Text added - double-click to edit");
+    toast.success("Text added - start typing!");
   };
 
 
