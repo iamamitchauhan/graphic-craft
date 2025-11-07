@@ -243,19 +243,6 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       try {
         const jsonData = typeof initialData === 'string' ? JSON.parse(initialData) : initialData;
         canvas.loadFromJSON(jsonData, () => {
-          // Make all text objects editable after loading (handle all text types)
-          canvas.getObjects().forEach((obj) => {
-            if (obj.type === 'i-text' || obj.type === 'text' || obj.type === 'textbox') {
-              obj.set({
-                editable: true,
-                editingBorderColor: '#3b82f6',
-                selectable: true,
-                lockScalingFlip: true,
-              });
-            }
-          });
-          
-          // Force multiple renders to ensure visibility
           canvas.renderAll();
           requestAnimationFrame(() => {
             canvas.renderAll();
@@ -265,45 +252,18 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       } catch (error) {
         console.error("Error loading design:", error);
         toast.error("Failed to load template");
-        addPredefinedText(); // Fallback to default text
+        addPredefinedText();
       }
     } else {
       addPredefinedText();
     }
 
-    // Enable text editing on double-click for all text types
+    // Simple double-click to edit text
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
-      if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
+      if (target && target.type === "i-text") {
         const textObj = target as IText;
-        // Ensure editable is true before entering editing mode
-        textObj.set({ editable: true });
-        canvas.renderAll();
-        
-        // Use setTimeout to ensure the object is ready
-        setTimeout(() => {
-          textObj.enterEditing();
-          textObj.selectAll();
-          canvas.renderAll();
-        }, 10);
-      }
-    });
-
-    // Enable editing on selection - single click should prepare for editing
-    canvas.on("selection:created", (e) => {
-      const target = e.selected?.[0];
-      if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
-        const textObj = target as IText;
-        textObj.set({ editable: true });
-        canvas.renderAll();
-      }
-    });
-
-    canvas.on("selection:updated", (e) => {
-      const target = e.selected?.[0];
-      if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
-        const textObj = target as IText;
-        textObj.set({ editable: true });
+        textObj.enterEditing();
         canvas.renderAll();
       }
     });

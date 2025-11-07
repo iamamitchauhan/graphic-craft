@@ -106,13 +106,12 @@ const Sidebar = ({ fabricCanvas }: Props) => {
       fontWeight: config.fontWeight,
       fill: "#000000",
       fontFamily: "Arial",
-      editable: true,
-      editingBorderColor: "#3b82f6",
     });
+    
     fabricCanvas.add(text);
     fabricCanvas.setActiveObject(text);
     fabricCanvas.renderAll();
-    toast.success("Text added - double-click to edit");
+    toast.success("Text added");
   };
 
 
