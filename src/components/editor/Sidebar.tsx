@@ -112,15 +112,7 @@ const Sidebar = ({ fabricCanvas }: Props) => {
     fabricCanvas.add(text);
     fabricCanvas.setActiveObject(text);
     fabricCanvas.renderAll();
-    
-    // Defer entering edit mode until after render completes
-    requestAnimationFrame(() => {
-      text.enterEditing();
-      text.selectAll();
-      fabricCanvas.renderAll();
-    });
-    
-    toast.success("Text added - start typing!");
+    toast.success("Text added - double-click to edit");
   };
 
 

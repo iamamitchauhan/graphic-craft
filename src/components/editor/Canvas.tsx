@@ -276,18 +276,35 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       const target = e.target;
       if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
         const textObj = target as IText;
-        textObj.enterEditing();
-        textObj.selectAll();
+        // Ensure editable is true before entering editing mode
+        textObj.set({ editable: true });
         canvas.renderAll();
+        
+        // Use setTimeout to ensure the object is ready
+        setTimeout(() => {
+          textObj.enterEditing();
+          textObj.selectAll();
+          canvas.renderAll();
+        }, 10);
       }
     });
 
-    // Also enable editing on selection for better UX
+    // Enable editing on selection - single click should prepare for editing
     canvas.on("selection:created", (e) => {
       const target = e.selected?.[0];
       if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
         const textObj = target as IText;
         textObj.set({ editable: true });
+        canvas.renderAll();
+      }
+    });
+
+    canvas.on("selection:updated", (e) => {
+      const target = e.selected?.[0];
+      if (target && (target.type === "i-text" || target.type === "text" || target.type === "textbox")) {
+        const textObj = target as IText;
+        textObj.set({ editable: true });
+        canvas.renderAll();
       }
     });
 
