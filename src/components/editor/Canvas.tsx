@@ -20,6 +20,34 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     const container = containerRef.current;
     if (!container) return;
 
+    // 💡 FABRIC.JS FIX FOR DIALOG/MODAL FOCUS TRAP
+    // Override the enterEditing function to append the hiddenTextarea
+    // to the canvas container (which is inside your Dialog component)
+    let originalEnterEditing: any;
+    // instead of document.body.
+    if (IText.prototype.enterEditing) {
+      // Store the original method reference
+      originalEnterEditing = IText.prototype.enterEditing;
+
+      // Override for both IText and Textbox
+      IText.prototype.enterEditing = function () {
+        // Check if the hiddenTextarea exists and is not already in the correct container
+        if (this.hiddenTextarea && this.hiddenTextarea.parentElement !== container) {
+          // Remove from current parent (usually document.body)
+          this.hiddenTextarea.remove();
+          // Append to the container inside the Dialog
+          container.appendChild(this.hiddenTextarea);
+        }
+        // Call the original method to handle the rest of the editing initialization
+        return originalEnterEditing.apply(this, arguments as any);
+      };
+
+      // Textbox is often an alias or uses the same internal logic, but overriding
+      // IText.prototype often covers Textbox as well. To be safe, you can apply
+      // the same logic to Textbox if you have it imported and it doesn't work.
+      // Textbox.prototype.enterEditing = IText.prototype.enterEditing;
+    }
+
     const containerPadding = 80;
     const maxWidth = container.clientWidth - containerPadding;
     const maxHeight = container.clientHeight - containerPadding;
@@ -94,20 +122,14 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       // Check canvas center alignment
       if (Math.abs(objCenter.x - canvasCenter.x) < snapThreshold) {
         obj.set({ left: canvasCenter.x - objWidth / 2 });
-        const line = createGuideLine(
-          [canvasCenter.x, 0, canvasCenter.x, template.height],
-          true
-        );
+        const line = createGuideLine([canvasCenter.x, 0, canvasCenter.x, template.height], true);
         verticalLines.push(line);
         canvas.add(line);
       }
 
       if (Math.abs(objCenter.y - canvasCenter.y) < snapThreshold) {
         obj.set({ top: canvasCenter.y - objHeight / 2 });
-        const line = createGuideLine(
-          [0, canvasCenter.y, template.width, canvasCenter.y],
-          false
-        );
+        const line = createGuideLine([0, canvasCenter.y, template.width, canvasCenter.y], false);
         horizontalLines.push(line);
         canvas.add(line);
       }
@@ -127,30 +149,21 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
         // Vertical alignment
         if (Math.abs(objCenter.x - otherCenter.x) < snapThreshold) {
           obj.set({ left: otherCenter.x - objWidth / 2 });
-          const line = createGuideLine(
-            [otherCenter.x, 0, otherCenter.x, template.height],
-            true
-          );
+          const line = createGuideLine([otherCenter.x, 0, otherCenter.x, template.height], true);
           verticalLines.push(line);
           canvas.add(line);
         }
 
         if (Math.abs(objLeft - otherLeft) < snapThreshold) {
           obj.set({ left: otherLeft });
-          const line = createGuideLine(
-            [otherLeft, 0, otherLeft, template.height],
-            true
-          );
+          const line = createGuideLine([otherLeft, 0, otherLeft, template.height], true);
           verticalLines.push(line);
           canvas.add(line);
         }
 
         if (Math.abs(objRight - otherRight) < snapThreshold) {
           obj.set({ left: otherRight - objWidth });
-          const line = createGuideLine(
-            [otherRight, 0, otherRight, template.height],
-            true
-          );
+          const line = createGuideLine([otherRight, 0, otherRight, template.height], true);
           verticalLines.push(line);
           canvas.add(line);
         }
@@ -158,30 +171,21 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
         // Horizontal alignment
         if (Math.abs(objCenter.y - otherCenter.y) < snapThreshold) {
           obj.set({ top: otherCenter.y - objHeight / 2 });
-          const line = createGuideLine(
-            [0, otherCenter.y, template.width, otherCenter.y],
-            false
-          );
+          const line = createGuideLine([0, otherCenter.y, template.width, otherCenter.y], false);
           horizontalLines.push(line);
           canvas.add(line);
         }
 
         if (Math.abs(objTop - otherTop) < snapThreshold) {
           obj.set({ top: otherTop });
-          const line = createGuideLine(
-            [0, otherTop, template.width, otherTop],
-            false
-          );
+          const line = createGuideLine([0, otherTop, template.width, otherTop], false);
           horizontalLines.push(line);
           canvas.add(line);
         }
 
         if (Math.abs(objBottom - otherBottom) < snapThreshold) {
           obj.set({ top: otherBottom - objHeight });
-          const line = createGuideLine(
-            [0, otherBottom, template.width, otherBottom],
-            false
-          );
+          const line = createGuideLine([0, otherBottom, template.width, otherBottom], false);
           horizontalLines.push(line);
           canvas.add(line);
         }
@@ -241,7 +245,7 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     // Load initial data if provided, otherwise add predefined text
     if (initialData) {
       try {
-        const jsonData = typeof initialData === 'string' ? JSON.parse(initialData) : initialData;
+        const jsonData = typeof initialData === "string" ? JSON.parse(initialData) : initialData;
         canvas.loadFromJSON(jsonData, () => {
           canvas.renderAll();
           requestAnimationFrame(() => {
@@ -286,6 +290,11 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     toast.success(`Canvas ready: ${template.name}`);
 
     return () => {
+      // ⭐ IMPORTANT: Restore the original prototype method
+      if (IText.prototype.enterEditing === IText.prototype.enterEditing) {
+        // Check if it's the overridden function
+        IText.prototype.enterEditing = originalEnterEditing;
+      }
       window.removeEventListener("keydown", handleKeyDown);
       canvas.dispose();
     };
@@ -294,7 +303,7 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
   return (
     <div ref={containerRef} className="w-full h-full flex items-center justify-center overflow-auto p-4">
       <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))] max-w-full max-h-full">
-        <canvas ref={canvasRef} className="max-w-full max-h-full" style={{ display: 'block' }} />
+        <canvas ref={canvasRef} className="max-w-full max-h-full" style={{ display: "block" }} />
       </div>
     </div>
   );
