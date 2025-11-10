@@ -182,10 +182,10 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
 
   return (
     <aside className="w-80 bg-[hsl(var(--sidebar-bg))] border-l border-border overflow-y-auto">
-      <Tabs defaultValue="arrange" className="w-full">
-        <TabsList className="w-full grid grid-cols-2">
+      <Tabs defaultValue={isText ? "properties" : "arrange"} className="w-full">
+        <TabsList className={`w-full grid ${isText ? 'grid-cols-2' : 'grid-cols-1'}`}>
           <TabsTrigger value="arrange">Arrange</TabsTrigger>
-          <TabsTrigger value="properties" disabled={!isText}>Properties</TabsTrigger>
+          {isText && <TabsTrigger value="properties">Properties</TabsTrigger>}
         </TabsList>
 
         <TabsContent value="arrange" className="p-4 space-y-4">
