@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Canvas as FabricCanvas, FabricObject, IText } from "fabric";
+import { Canvas as FabricCanvas, FabricObject, Textbox } from "fabric";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,8 +33,8 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
       const active = fabricCanvas.getActiveObject();
       setSelectedObject(active || null);
       
-      if (active && active.type === "i-text") {
-        const text = active as IText;
+      if (active && (active.type === "textbox" || active.type === "i-text")) {
+        const text = active as Textbox;
         setFontFamily(text.fontFamily || "Arial");
         setFontSize(text.fontSize || 20);
         setFontColor(text.fill as string || "#000000");
@@ -47,17 +47,23 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
     fabricCanvas.on("selection:created", updateSelection);
     fabricCanvas.on("selection:updated", updateSelection);
     fabricCanvas.on("selection:cleared", () => setSelectedObject(null));
+    fabricCanvas.on("text:changed", updateSelection);
+    fabricCanvas.on("text:editing:entered", updateSelection);
+    fabricCanvas.on("text:editing:exited", updateSelection);
 
     return () => {
       fabricCanvas.off("selection:created", updateSelection);
       fabricCanvas.off("selection:updated", updateSelection);
       fabricCanvas.off("selection:cleared");
+      fabricCanvas.off("text:changed", updateSelection);
+      fabricCanvas.off("text:editing:entered", updateSelection);
+      fabricCanvas.off("text:editing:exited", updateSelection);
     };
   }, [fabricCanvas]);
 
   const updateTextProperty = (property: string, value: any) => {
-    if (selectedObject && selectedObject.type === "i-text") {
-      const text = selectedObject as IText;
+    if (selectedObject && (selectedObject.type === "textbox" || selectedObject.type === "i-text")) {
+      const text = selectedObject as Textbox;
       text.set(property as any, value);
       fabricCanvas.renderAll();
     }
@@ -172,7 +178,7 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
     );
   }
 
-  const isText = selectedObject.type === "i-text";
+  const isText = selectedObject.type === "textbox" || selectedObject.type === "i-text";
 
   return (
     <aside className="w-80 bg-[hsl(var(--sidebar-bg))] border-l border-border overflow-y-auto">
