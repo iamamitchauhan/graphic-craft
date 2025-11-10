@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import TemplateSelector from "@/components/editor/TemplateSelector";
 import Toolbar from "@/components/editor/Toolbar";
 import Sidebar from "@/components/editor/Sidebar";
+import PropertiesPanel from "@/components/editor/PropertiesPanel";
 import Canvas from "@/components/editor/Canvas";
 import { Canvas as FabricCanvas } from "fabric";
 
@@ -60,6 +61,10 @@ const Editor = ({ initialDesign }: Props) => {
             />
           )}
         </main>
+
+        {selectedTemplate && fabricCanvas && (
+          <PropertiesPanel fabricCanvas={fabricCanvas} />
+        )}
       </div>
     </div>
   );
