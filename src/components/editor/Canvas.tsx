@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { Canvas as FabricCanvas, Line, FabricObject, IText } from "fabric";
+import { Canvas as FabricCanvas, Line, FabricObject, Textbox } from "fabric";
 import type { TemplateSize } from "@/pages/Editor";
 import { toast } from "sonner";
 
@@ -25,12 +25,12 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     // to the canvas container (which is inside your Dialog component)
     let originalEnterEditing: any;
     // instead of document.body.
-    if (IText.prototype.enterEditing) {
+    if (Textbox.prototype.enterEditing) {
       // Store the original method reference
-      originalEnterEditing = IText.prototype.enterEditing;
+      originalEnterEditing = Textbox.prototype.enterEditing;
 
-      // Override for both IText and Textbox
-      IText.prototype.enterEditing = function () {
+      // Override for both Textbox and IText
+      Textbox.prototype.enterEditing = function () {
         // Check if the hiddenTextarea exists and is not already in the correct container
         if (this.hiddenTextarea && this.hiddenTextarea.parentElement !== container) {
           // Remove from current parent (usually document.body)
@@ -224,7 +224,7 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
         fontSize = 40;
       }
 
-      const text = new IText(textContent, {
+      const text = new Textbox(textContent, {
         left: template.width / 2,
         top: topPosition,
         fontSize: fontSize,
@@ -236,6 +236,8 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
         originY: "top",
         editable: true,
         editingBorderColor: "#3b82f6",
+        width: template.width * 0.8,
+        splitByGrapheme: true,
       });
 
       canvas.add(text);
@@ -265,8 +267,8 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     // Simple double-click to edit text
     canvas.on("mouse:dblclick", (e) => {
       const target = e.target;
-      if (target && target.type === "i-text") {
-        const textObj = target as IText;
+      if (target && (target.type === "textbox" || target.type === "i-text")) {
+        const textObj = target as Textbox;
         textObj.enterEditing();
         canvas.renderAll();
       }
@@ -291,9 +293,9 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
 
     return () => {
       // ⭐ IMPORTANT: Restore the original prototype method
-      if (IText.prototype.enterEditing === IText.prototype.enterEditing) {
+      if (Textbox.prototype.enterEditing === Textbox.prototype.enterEditing) {
         // Check if it's the overridden function
-        IText.prototype.enterEditing = originalEnterEditing;
+        Textbox.prototype.enterEditing = originalEnterEditing;
       }
       window.removeEventListener("keydown", handleKeyDown);
       canvas.dispose();

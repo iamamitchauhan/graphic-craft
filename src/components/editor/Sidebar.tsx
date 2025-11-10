@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Square, Circle, Triangle, Type, Image as ImageIcon, Minus, ArrowRight } from "lucide-react";
-import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, IText, FabricImage, Line } from "fabric";
+import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Textbox, FabricImage, Line } from "fabric";
 import { toast } from "sonner";
 
 type Props = {
@@ -93,19 +93,21 @@ const Sidebar = ({ fabricCanvas }: Props) => {
 
   const addText = (preset: "heading" | "subheading" | "body") => {
     const configs = {
-      heading: { text: "Heading", fontSize: 48, fontWeight: "bold" },
-      subheading: { text: "Subheading", fontSize: 32, fontWeight: "600" },
-      body: { text: "Body Text", fontSize: 20, fontWeight: "normal" },
+      heading: { text: "Heading", fontSize: 48, fontWeight: "bold", width: 300 },
+      subheading: { text: "Subheading", fontSize: 32, fontWeight: "600", width: 250 },
+      body: { text: "Body Text", fontSize: 20, fontWeight: "normal", width: 200 },
     };
 
     const config = configs[preset];
-    const text = new IText(config.text, {
+    const text = new Textbox(config.text, {
       left: 100,
       top: 100,
       fontSize: config.fontSize,
       fontWeight: config.fontWeight,
       fill: "#000000",
       fontFamily: "Arial",
+      width: config.width,
+      splitByGrapheme: true,
     });
     
     fabricCanvas.add(text);
@@ -147,12 +149,13 @@ const Sidebar = ({ fabricCanvas }: Props) => {
   };
 
   const addSticker = (emoji: string) => {
-    const sticker = new IText(emoji, {
+    const sticker = new Textbox(emoji, {
       left: 100,
       top: 100,
       fontSize: 80,
       fontFamily: "Arial",
       editable: false,
+      width: 100,
     });
     fabricCanvas.add(sticker);
     fabricCanvas.setActiveObject(sticker);
