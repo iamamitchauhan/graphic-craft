@@ -16,18 +16,14 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
   useEffect(() => {
     if (!canvasRef.current) return;
 
+    // Calculate scale to fit canvas in viewport
     const container = containerRef.current;
     if (!container) return;
 
-    // Calculate scale to fit canvas in viewport while maintaining aspect ratio
-    const containerPadding = 100;
+    const containerPadding = 80;
     const maxWidth = container.clientWidth - containerPadding;
     const maxHeight = container.clientHeight - containerPadding;
-    
-    // Calculate scale factor to fit canvas in container
-    const scaleX = maxWidth / template.width;
-    const scaleY = maxHeight / template.height;
-    const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down if needed
+    const scale = Math.min(maxWidth / template.width, maxHeight / template.height, 1);
 
     const canvas = new FabricCanvas(canvasRef.current, {
       width: template.width,
@@ -35,16 +31,14 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
       backgroundColor: "#ffffff",
     });
 
-    // Set viewport dimensions to show scaled version
-    const viewportWidth = template.width * scale;
-    const viewportHeight = template.height * scale;
-    
-    canvas.setDimensions({
-      width: viewportWidth,
-      height: viewportHeight,
-    });
-    
-    canvas.setZoom(scale);
+    // Apply scaling if needed
+    if (scale < 1) {
+      canvas.setDimensions({
+        width: template.width * scale,
+        height: template.height * scale,
+      });
+      canvas.setZoom(scale);
+    }
 
     // Initialize the freeDrawingBrush
     if (canvas.freeDrawingBrush) {

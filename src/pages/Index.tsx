@@ -1,9 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { Palette, Sparkles, Share2, Zap } from "lucide-react";
+import DesignGalleryModal from "@/components/editor/DesignGalleryModal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import Editor from "./Editor";
 
 const Index = () => {
-  const navigate = useNavigate();
+  const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
+  const [editingDesign, setEditingDesign] = useState<any>(null);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted">
@@ -23,13 +28,39 @@ const Index = () => {
         <div className="text-center mb-20">
           <Button
             size="lg"
-            onClick={() => navigate("/gallery")}
+            onClick={() => setIsGalleryOpen(true)}
             className="text-lg px-8 py-6 h-auto shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
           >
             <Sparkles className="w-5 h-5 mr-2" />
             Create Design
           </Button>
         </div>
+
+        {/* Design Gallery Modal */}
+        <DesignGalleryModal
+          open={isGalleryOpen}
+          onOpenChange={setIsGalleryOpen}
+          onCreateNew={() => {
+            setIsGalleryOpen(false);
+            setEditingDesign(null);
+            setIsEditorOpen(true);
+          }}
+          onEditDesign={(design) => {
+            setIsGalleryOpen(false);
+            setEditingDesign(design);
+            setIsEditorOpen(true);
+          }}
+        />
+
+        {/* Editor Modal */}
+        <Dialog open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+          <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0">
+            <DialogHeader className="sr-only">
+              <DialogTitle>Design Editor</DialogTitle>
+            </DialogHeader>
+            <Editor initialDesign={editingDesign} />
+          </DialogContent>
+        </Dialog>
 
         {/* Features */}
         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">

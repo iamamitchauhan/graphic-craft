@@ -622,8 +622,8 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     <>
       <div className="bg-[hsl(var(--toolbar-bg))] border-b border-border px-4 py-3">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Gallery Button */}
-          <Button variant="ghost" size="icon" onClick={() => navigate("/gallery")} title="Back to Gallery">
+          {/* Home Button */}
+          <Button variant="ghost" size="icon" onClick={() => navigate("/")}>
             <Home className="w-4 h-4" />
           </Button>
 
