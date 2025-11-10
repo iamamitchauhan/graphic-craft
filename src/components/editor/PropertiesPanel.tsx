@@ -74,7 +74,19 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
 
   const sendToBack = () => {
     if (selectedObject) {
-      fabricCanvas.sendObjectToBack(selectedObject);
+      const objects = fabricCanvas.getObjects();
+      const currentIndex = objects.indexOf(selectedObject);
+      
+      // Prevent going to index 0 (reserve for background layer)
+      if (objects.length > 1 && currentIndex > 1) {
+        // Remove and re-add at index 1 (above background)
+        fabricCanvas.remove(selectedObject);
+        fabricCanvas.insertAt(1, selectedObject);
+        fabricCanvas.setActiveObject(selectedObject);
+      } else if (currentIndex === 1) {
+        toast.info("Object is already at the back");
+      }
+      
       fabricCanvas.renderAll();
       toast.success("Sent to back");
     }
@@ -90,7 +102,16 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
 
   const sendBackward = () => {
     if (selectedObject) {
-      fabricCanvas.sendObjectBackwards(selectedObject);
+      const objects = fabricCanvas.getObjects();
+      const currentIndex = objects.indexOf(selectedObject);
+      
+      // Only move backward if not already at index 1 (preserve index 0 for background)
+      if (currentIndex > 1) {
+        fabricCanvas.sendObjectBackwards(selectedObject);
+      } else if (currentIndex === 1) {
+        toast.info("Object is already at the back");
+      }
+      
       fabricCanvas.renderAll();
       toast.success("Sent backward");
     }
