@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import TemplateSelector from "@/components/editor/TemplateSelector";
 import Toolbar from "@/components/editor/Toolbar";
 import Sidebar from "@/components/editor/Sidebar";
@@ -11,11 +12,9 @@ export type TemplateSize = {
   height: number;
 };
 
-type Props = {
-  initialDesign?: any;
-};
-
-const Editor = ({ initialDesign }: Props) => {
+const Editor = () => {
+  const location = useLocation();
+  const initialDesign = location.state?.design;
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateSize | null>(null);
   const [fabricCanvas, setFabricCanvas] = useState<FabricCanvas | null>(null);
 
