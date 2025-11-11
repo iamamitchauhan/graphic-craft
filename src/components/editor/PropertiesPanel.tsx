@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import ColorPalettes from "./ColorPalettes";
 import { 
   ArrowUp, ArrowDown, 
   AlignLeft, AlignCenter, AlignRight,
@@ -393,6 +394,19 @@ const PropertiesPanel = ({ fabricCanvas }: Props) => {
                     className="flex-1"
                   />
                 </div>
+              </div>
+
+              <Separator />
+
+              {/* Color Palettes */}
+              <div>
+                <Label className="text-sm font-semibold mb-3 block">Color Palettes</Label>
+                <ColorPalettes 
+                  onColorSelect={(color) => {
+                    setFontColor(color);
+                    updateTextProperty("fill", color);
+                  }} 
+                />
               </div>
 
               {/* Text Alignment */}
