@@ -284,8 +284,9 @@ const ThemeSelector = ({ fabricCanvas }: Props) => {
   });
 
   const applyTheme = (theme: ThemePalette) => {
-    // Set canvas background
+    // Set canvas background and render immediately
     fabricCanvas.backgroundColor = theme.background;
+    fabricCanvas.renderAll();
     
     // Get all text objects
     const objects = fabricCanvas.getObjects();
@@ -325,7 +326,8 @@ const ThemeSelector = ({ fabricCanvas }: Props) => {
       }
     });
 
-    fabricCanvas.renderAll();
+    // Final render to apply all changes
+    fabricCanvas.requestRenderAll();
     setOpen(false);
     toast.success(`Applied "${theme.name}" theme with fonts & styles`);
   };
@@ -341,6 +343,9 @@ const ThemeSelector = ({ fabricCanvas }: Props) => {
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle>Color Palettes</DialogTitle>
+          <p className="text-sm text-muted-foreground mt-2">
+            Select a theme to apply background color, fonts, and styles to all content
+          </p>
         </DialogHeader>
         
         <div className="space-y-4">
