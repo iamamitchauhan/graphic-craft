@@ -45,7 +45,6 @@ import { Canvas as FabricCanvas, FabricImage, IText } from "fabric";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import ExportDialog from "./ExportDialog";
-import ThemeSelector from "./ThemeSelector";
 import type { TemplateSize } from "@/pages/Editor";
 import { toast } from "@/hooks/use-toast";
 import { Upload } from "lucide-react";
@@ -781,9 +780,6 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
               </div>
             </PopoverContent>
           </Popover>
-
-          {/* Theme Selector */}
-          <ThemeSelector fabricCanvas={fabricCanvas} />
 
           <div className="w-px h-6 bg-border" />
 

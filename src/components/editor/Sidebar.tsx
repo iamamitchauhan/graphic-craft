@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Square, Circle, Triangle, Type, Image as ImageIcon, Minus, ArrowRight } from "lucide-react";
 import { Canvas as FabricCanvas, Rect, Circle as FabricCircle, Triangle as FabricTriangle, Textbox, FabricImage, Line } from "fabric";
 import { toast } from "sonner";
+import ThemeSelector from "./ThemeSelector";
 
 type Props = {
   fabricCanvas: FabricCanvas;
@@ -228,6 +229,12 @@ const Sidebar = ({ fabricCanvas }: Props) => {
   return (
     <aside className="w-64 bg-[hsl(var(--sidebar-bg))] border-r border-border p-4 overflow-y-auto">
       <div className="space-y-6">
+        {/* Theme Selector */}
+        <div>
+          <h3 className="font-semibold mb-3 text-foreground">Themes</h3>
+          <ThemeSelector fabricCanvas={fabricCanvas} />
+        </div>
+
         {/* Shapes Section */}
         <div>
           <h3 className="font-semibold mb-3 text-foreground">Shapes</h3>
