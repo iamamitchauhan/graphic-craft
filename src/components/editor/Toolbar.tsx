@@ -93,21 +93,14 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   const historyStepRef = useRef<number>(-1);
   const isProcessingRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastBackgroundRef = useRef<string>("");
   const isInitializedRef = useRef(false);
+  const eventHandlersRef = useRef<{
+    saveState: () => void;
+    debouncedSaveState: () => void;
+  } | null>(null);
 
   // Initialize history
   useEffect(() => {
-    // Wait a bit for canvas to fully initialize before tracking history
-    const initTimeout = setTimeout(() => {
-      if (!isInitializedRef.current) {
-        const initialState = JSON.stringify(fabricCanvas.toJSON());
-        historyRef.current = [initialState];
-        historyStepRef.current = 0;
-        isInitializedRef.current = true;
-      }
-    }, 500);
-
     const saveState = () => {
       if (isProcessingRef.current || !isInitializedRef.current) return;
       
@@ -118,9 +111,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       if (lastState === json) return;
       
       // Remove any future states if we're not at the end
-      historyStepRef.current++;
-      historyRef.current = historyRef.current.slice(0, historyStepRef.current);
+      if (historyStepRef.current < historyRef.current.length - 1) {
+        historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
+      }
+      
       historyRef.current.push(json);
+      historyStepRef.current++;
       
       // Limit history to 50 states to prevent memory issues
       if (historyRef.current.length > 50) {
@@ -139,6 +135,19 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         saveState();
       }, 300);
     };
+
+    // Store handlers in ref so we can remove them during undo/redo
+    eventHandlersRef.current = { saveState, debouncedSaveState };
+
+    // Wait a bit for canvas to fully initialize before tracking history
+    const initTimeout = setTimeout(() => {
+      if (!isInitializedRef.current) {
+        const initialState = JSON.stringify(fabricCanvas.toJSON());
+        historyRef.current = [initialState];
+        historyStepRef.current = 0;
+        isInitializedRef.current = true;
+      }
+    }, 500);
 
     // Track meaningful changes
     fabricCanvas.on("object:added", saveState);
@@ -376,12 +385,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     setBackgroundColor(color);
     fabricCanvas.backgroundColor = color;
     fabricCanvas.renderAll();
-    
-    // Track background change
-    if (lastBackgroundRef.current !== color) {
-      lastBackgroundRef.current = color;
-      saveStateToHistory();
-    }
+    saveStateToHistory();
   };
 
   const handleBackgroundImage = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -500,8 +504,16 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   };
 
   const handleUndo = async () => {
-    if (historyStepRef.current > 0 && !isProcessingRef.current) {
+    if (historyStepRef.current > 0 && !isProcessingRef.current && eventHandlersRef.current) {
       isProcessingRef.current = true;
+      
+      // Temporarily remove event listeners to prevent saving new states
+      const { saveState, debouncedSaveState } = eventHandlersRef.current;
+      fabricCanvas.off("object:added", saveState);
+      fabricCanvas.off("object:removed", saveState);
+      fabricCanvas.off("object:modified", debouncedSaveState);
+      fabricCanvas.off("text:changed", debouncedSaveState);
+      
       historyStepRef.current--;
       const state = historyRef.current[historyStepRef.current];
       
@@ -513,7 +525,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
           obj.setCoords();
         });
         
-        fabricCanvas.requestRenderAll();
+        fabricCanvas.renderAll();
         
         toast({
           title: "Undo",
@@ -523,8 +535,15 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         console.error("Undo failed:", error);
         historyStepRef.current++; // Restore position on error
       } finally {
-        // Small delay to prevent saving state during restoration
+        // Re-attach event listeners after a delay
         setTimeout(() => {
+          if (eventHandlersRef.current) {
+            const { saveState, debouncedSaveState } = eventHandlersRef.current;
+            fabricCanvas.on("object:added", saveState);
+            fabricCanvas.on("object:removed", saveState);
+            fabricCanvas.on("object:modified", debouncedSaveState);
+            fabricCanvas.on("text:changed", debouncedSaveState);
+          }
           isProcessingRef.current = false;
         }, 100);
       }
@@ -532,8 +551,16 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   };
 
   const handleRedo = async () => {
-    if (historyStepRef.current < historyRef.current.length - 1 && !isProcessingRef.current) {
+    if (historyStepRef.current < historyRef.current.length - 1 && !isProcessingRef.current && eventHandlersRef.current) {
       isProcessingRef.current = true;
+      
+      // Temporarily remove event listeners to prevent saving new states
+      const { saveState, debouncedSaveState } = eventHandlersRef.current;
+      fabricCanvas.off("object:added", saveState);
+      fabricCanvas.off("object:removed", saveState);
+      fabricCanvas.off("object:modified", debouncedSaveState);
+      fabricCanvas.off("text:changed", debouncedSaveState);
+      
       historyStepRef.current++;
       const state = historyRef.current[historyStepRef.current];
       
@@ -545,7 +572,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
           obj.setCoords();
         });
         
-        fabricCanvas.requestRenderAll();
+        fabricCanvas.renderAll();
         
         toast({
           title: "Redo",
@@ -555,8 +582,15 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         console.error("Redo failed:", error);
         historyStepRef.current--; // Restore position on error
       } finally {
-        // Small delay to prevent saving state during restoration
+        // Re-attach event listeners after a delay
         setTimeout(() => {
+          if (eventHandlersRef.current) {
+            const { saveState, debouncedSaveState } = eventHandlersRef.current;
+            fabricCanvas.on("object:added", saveState);
+            fabricCanvas.on("object:removed", saveState);
+            fabricCanvas.on("object:modified", debouncedSaveState);
+            fabricCanvas.on("text:changed", debouncedSaveState);
+          }
           isProcessingRef.current = false;
         }, 100);
       }
