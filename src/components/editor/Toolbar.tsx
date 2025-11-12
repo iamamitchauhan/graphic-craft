@@ -94,6 +94,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   const isProcessingRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const isInitializedRef = useRef(false);
+  const isModifyingRef = useRef(false);
   const eventHandlersRef = useRef<{
     saveState: () => void;
     debouncedSaveState: () => void;
@@ -102,7 +103,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   // Initialize history
   useEffect(() => {
     const saveState = () => {
-      if (isProcessingRef.current || !isInitializedRef.current) return;
+      if (isProcessingRef.current || !isInitializedRef.current || isModifyingRef.current) return;
       
       const json = JSON.stringify(fabricCanvas.toJSON());
       
@@ -125,19 +126,22 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       }
     };
 
-    const debouncedSaveState = () => {
-      if (isProcessingRef.current || !isInitializedRef.current) return;
-      
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
-      saveTimeoutRef.current = setTimeout(() => {
+    // Track when object modification starts (drag, scale, rotate)
+    const handleModifyStart = () => {
+      isModifyingRef.current = true;
+    };
+
+    // Track when object modification ends
+    const handleModifyEnd = () => {
+      isModifyingRef.current = false;
+      // Save state after modification completes
+      if (!isProcessingRef.current && isInitializedRef.current) {
         saveState();
-      }, 300);
+      }
     };
 
     // Store handlers in ref so we can remove them during undo/redo
-    eventHandlersRef.current = { saveState, debouncedSaveState };
+    eventHandlersRef.current = { saveState, debouncedSaveState: handleModifyEnd };
 
     // Wait a bit for canvas to fully initialize before tracking history
     const initTimeout = setTimeout(() => {
@@ -152,8 +156,18 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     // Track meaningful changes
     fabricCanvas.on("object:added", saveState);
     fabricCanvas.on("object:removed", saveState);
-    fabricCanvas.on("object:modified", debouncedSaveState);
-    fabricCanvas.on("text:changed", debouncedSaveState);
+    
+    // Track modification start events
+    fabricCanvas.on("object:moving", handleModifyStart);
+    fabricCanvas.on("object:scaling", handleModifyStart);
+    fabricCanvas.on("object:rotating", handleModifyStart);
+    fabricCanvas.on("object:skewing", handleModifyStart);
+    
+    // Track modification end - only save once when done
+    fabricCanvas.on("object:modified", handleModifyEnd);
+    
+    // For text changes, save immediately
+    fabricCanvas.on("text:changed", saveState);
 
     return () => {
       clearTimeout(initTimeout);
@@ -162,8 +176,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       }
       fabricCanvas.off("object:added", saveState);
       fabricCanvas.off("object:removed", saveState);
-      fabricCanvas.off("object:modified", debouncedSaveState);
-      fabricCanvas.off("text:changed", debouncedSaveState);
+      fabricCanvas.off("object:moving", handleModifyStart);
+      fabricCanvas.off("object:scaling", handleModifyStart);
+      fabricCanvas.off("object:rotating", handleModifyStart);
+      fabricCanvas.off("object:skewing", handleModifyStart);
+      fabricCanvas.off("object:modified", handleModifyEnd);
+      fabricCanvas.off("text:changed", saveState);
     };
   }, [fabricCanvas]);
 
