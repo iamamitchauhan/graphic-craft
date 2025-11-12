@@ -91,14 +91,25 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   // History management for undo/redo
   const historyRef = useRef<string[]>([]);
   const historyStepRef = useRef<number>(-1);
-  const isUndoingRef = useRef(false);
+  const isProcessingRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastBackgroundRef = useRef<string>("");
+  const isInitializedRef = useRef(false);
 
   // Initialize history
   useEffect(() => {
+    // Wait a bit for canvas to fully initialize before tracking history
+    const initTimeout = setTimeout(() => {
+      if (!isInitializedRef.current) {
+        const initialState = JSON.stringify(fabricCanvas.toJSON());
+        historyRef.current = [initialState];
+        historyStepRef.current = 0;
+        isInitializedRef.current = true;
+      }
+    }, 500);
+
     const saveState = () => {
-      if (isUndoingRef.current) return;
+      if (isProcessingRef.current || !isInitializedRef.current) return;
       
       const json = JSON.stringify(fabricCanvas.toJSON());
       
@@ -106,30 +117,37 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       const lastState = historyRef.current[historyStepRef.current];
       if (lastState === json) return;
       
+      // Remove any future states if we're not at the end
       historyStepRef.current++;
-      historyRef.current[historyStepRef.current] = json;
-      historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
+      historyRef.current = historyRef.current.slice(0, historyStepRef.current);
+      historyRef.current.push(json);
+      
+      // Limit history to 50 states to prevent memory issues
+      if (historyRef.current.length > 50) {
+        historyRef.current.shift();
+        historyStepRef.current--;
+      }
     };
 
     const debouncedSaveState = () => {
+      if (isProcessingRef.current || !isInitializedRef.current) return;
+      
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
       saveTimeoutRef.current = setTimeout(() => {
         saveState();
-      }, 300); // Debounce for 300ms to avoid saving every pixel movement
+      }, 300);
     };
 
-    // Save initial state
-    saveState();
-
     // Track meaningful changes
-    fabricCanvas.on("object:added", saveState); // Immediate save for additions
-    fabricCanvas.on("object:removed", saveState); // Immediate save for deletions
-    fabricCanvas.on("object:modified", debouncedSaveState); // Debounced for modifications (resize, move, rotate)
-    fabricCanvas.on("text:changed", debouncedSaveState); // Track text content changes
+    fabricCanvas.on("object:added", saveState);
+    fabricCanvas.on("object:removed", saveState);
+    fabricCanvas.on("object:modified", debouncedSaveState);
+    fabricCanvas.on("text:changed", debouncedSaveState);
 
     return () => {
+      clearTimeout(initTimeout);
       if (saveTimeoutRef.current) {
         clearTimeout(saveTimeoutRef.current);
       }
@@ -289,15 +307,22 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   };
 
   const saveStateToHistory = () => {
-    if (isUndoingRef.current) return;
+    if (isProcessingRef.current || !isInitializedRef.current) return;
     
     const json = JSON.stringify(fabricCanvas.toJSON());
     const lastState = historyRef.current[historyStepRef.current];
     if (lastState === json) return;
     
+    // Remove any future states if we're not at the end
     historyStepRef.current++;
-    historyRef.current[historyStepRef.current] = json;
-    historyRef.current = historyRef.current.slice(0, historyStepRef.current + 1);
+    historyRef.current = historyRef.current.slice(0, historyStepRef.current);
+    historyRef.current.push(json);
+    
+    // Limit history to 50 states
+    if (historyRef.current.length > 50) {
+      historyRef.current.shift();
+      historyStepRef.current--;
+    }
   };
 
   const handleBringForward = () => {
@@ -475,8 +500,8 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
   };
 
   const handleUndo = async () => {
-    if (historyStepRef.current > 0) {
-      isUndoingRef.current = true;
+    if (historyStepRef.current > 0 && !isProcessingRef.current) {
+      isProcessingRef.current = true;
       historyStepRef.current--;
       const state = historyRef.current[historyStepRef.current];
       
@@ -496,15 +521,19 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         });
       } catch (error) {
         console.error("Undo failed:", error);
+        historyStepRef.current++; // Restore position on error
       } finally {
-        isUndoingRef.current = false;
+        // Small delay to prevent saving state during restoration
+        setTimeout(() => {
+          isProcessingRef.current = false;
+        }, 100);
       }
     }
   };
 
   const handleRedo = async () => {
-    if (historyStepRef.current < historyRef.current.length - 1) {
-      isUndoingRef.current = true;
+    if (historyStepRef.current < historyRef.current.length - 1 && !isProcessingRef.current) {
+      isProcessingRef.current = true;
       historyStepRef.current++;
       const state = historyRef.current[historyStepRef.current];
       
@@ -524,8 +553,12 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         });
       } catch (error) {
         console.error("Redo failed:", error);
+        historyStepRef.current--; // Restore position on error
       } finally {
-        isUndoingRef.current = false;
+        // Small delay to prevent saving state during restoration
+        setTimeout(() => {
+          isProcessingRef.current = false;
+        }, 100);
       }
     }
   };
