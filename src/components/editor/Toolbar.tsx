@@ -170,17 +170,11 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     fabricCanvas.on("text:changed", saveState);
 
     // Handle auto-continuation of lists when Enter is pressed
-    let isAutoAddingListFormat = false;
+    let lastAutoAddedFormat = { line: -1, format: "" };
     
     const handleTextInput = (e: any) => {
       const activeObject = e.target;
       if (!activeObject || (activeObject.type !== "textbox" && activeObject.type !== "i-text")) return;
-      
-      // Skip if we're in the middle of auto-adding list formatting
-      if (isAutoAddingListFormat) {
-        isAutoAddingListFormat = false;
-        return;
-      }
       
       const text = activeObject.text || "";
       const lines = text.split("\n");
@@ -201,18 +195,29 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       
       if (currentLineIndex === -1) currentLineIndex = lines.length - 1;
       
-      // Check if current line is empty or just whitespace and previous line has list formatting
+      const currentLine = lines[currentLineIndex];
+      
+      // Skip if we just auto-added formatting to this line and it's still just the formatting
+      if (lastAutoAddedFormat.line === currentLineIndex && 
+          currentLine.trim() === lastAutoAddedFormat.format.trim()) {
+        return;
+      }
+      
+      // Reset if user has typed something after the auto-added format
+      if (lastAutoAddedFormat.line === currentLineIndex && 
+          currentLine.trim() !== lastAutoAddedFormat.format.trim() &&
+          currentLine.length > lastAutoAddedFormat.format.length) {
+        lastAutoAddedFormat = { line: -1, format: "" };
+      }
+      
+      // Check if current line is empty and previous line has list formatting
       if (currentLineIndex > 0) {
-        const currentLine = lines[currentLineIndex];
         const previousLine = lines[currentLineIndex - 1];
         
-        // Only auto-add if current line doesn't already have formatting
-        const hasNoFormatting = !currentLine.trim().startsWith("•") && !/^\d+\.\s/.test(currentLine.trim());
-        
-        if (hasNoFormatting && currentLine.trim() === "") {
+        // Only auto-add if current line is empty (no formatting yet)
+        if (currentLine.trim() === "") {
           // Check for bullet list
           if (previousLine.trim().startsWith("•")) {
-            isAutoAddingListFormat = true;
             const newLines = [...lines];
             newLines[currentLineIndex] = "• ";
             activeObject.set("text", newLines.join("\n"));
@@ -226,16 +231,19 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             
             activeObject.selectionStart = activeObject.selectionEnd = newCursorPos;
             fabricCanvas.renderAll();
+            
+            // Remember we just added this format
+            lastAutoAddedFormat = { line: currentLineIndex, format: "• " };
             return;
           }
           
           // Check for numbered list
           const numberMatch = previousLine.trim().match(/^(\d+)\.\s/);
           if (numberMatch) {
-            isAutoAddingListFormat = true;
             const nextNumber = parseInt(numberMatch[1]) + 1;
+            const format = `${nextNumber}. `;
             const newLines = [...lines];
-            newLines[currentLineIndex] = `${nextNumber}. `;
+            newLines[currentLineIndex] = format;
             activeObject.set("text", newLines.join("\n"));
             
             // Set cursor after the number
@@ -243,10 +251,13 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             for (let i = 0; i < currentLineIndex; i++) {
               newCursorPos += newLines[i].length + 1;
             }
-            newCursorPos += `${nextNumber}. `.length;
+            newCursorPos += format.length;
             
             activeObject.selectionStart = activeObject.selectionEnd = newCursorPos;
             fabricCanvas.renderAll();
+            
+            // Remember we just added this format
+            lastAutoAddedFormat = { line: currentLineIndex, format };
             return;
           }
         }
