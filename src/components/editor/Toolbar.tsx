@@ -172,44 +172,72 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     // Handle auto-continuation of lists when Enter is pressed
     const handleTextInput = (e: any) => {
       const activeObject = e.target;
-      if (activeObject && (activeObject.type === "textbox" || activeObject.type === "i-text")) {
-        const text = activeObject.text || "";
-        const lines = text.split("\n");
-        const cursorPosition = activeObject.selectionStart;
-        
-        // Find which line the cursor is on
-        let charCount = 0;
-        let currentLineIndex = 0;
-        for (let i = 0; i < lines.length; i++) {
-          charCount += lines[i].length + 1; // +1 for newline
-          if (charCount > cursorPosition) {
-            currentLineIndex = i;
-            break;
-          }
+      if (!activeObject || (activeObject.type !== "textbox" && activeObject.type !== "i-text")) return;
+      
+      const text = activeObject.text || "";
+      const lines = text.split("\n");
+      const cursorPosition = activeObject.selectionStart || 0;
+      
+      // Find which line the cursor is on by counting characters
+      let charCount = 0;
+      let currentLineIndex = -1;
+      
+      for (let i = 0; i < lines.length; i++) {
+        const lineLength = lines[i].length;
+        if (cursorPosition <= charCount + lineLength) {
+          currentLineIndex = i;
+          break;
         }
+        charCount += lineLength + 1; // +1 for the newline character
+      }
+      
+      if (currentLineIndex === -1) currentLineIndex = lines.length - 1;
+      
+      // Check if current line is empty or just whitespace and previous line has list formatting
+      if (currentLineIndex > 0) {
+        const currentLine = lines[currentLineIndex];
+        const previousLine = lines[currentLineIndex - 1];
         
-        // Check if we just added a new line (previous line has list formatting)
-        if (currentLineIndex > 0 && lines[currentLineIndex] === "") {
-          const previousLine = lines[currentLineIndex - 1];
-          
+        // Only auto-add if current line doesn't already have formatting
+        const hasNoFormatting = !currentLine.trim().startsWith("•") && !/^\d+\.\s/.test(currentLine.trim());
+        
+        if (hasNoFormatting && currentLine.trim() === "") {
           // Check for bullet list
           if (previousLine.trim().startsWith("•")) {
-            lines[currentLineIndex] = "• ";
-            activeObject.set("text", lines.join("\n"));
-            activeObject.selectionStart = activeObject.selectionEnd = charCount + 2;
+            const newLines = [...lines];
+            newLines[currentLineIndex] = "• ";
+            activeObject.set("text", newLines.join("\n"));
+            
+            // Set cursor after the bullet
+            let newCursorPos = 0;
+            for (let i = 0; i < currentLineIndex; i++) {
+              newCursorPos += newLines[i].length + 1;
+            }
+            newCursorPos += 2; // After "• "
+            
+            activeObject.selectionStart = activeObject.selectionEnd = newCursorPos;
             fabricCanvas.renderAll();
-            return;
+            e.preventDefault?.();
           }
           
           // Check for numbered list
           const numberMatch = previousLine.trim().match(/^(\d+)\.\s/);
           if (numberMatch) {
             const nextNumber = parseInt(numberMatch[1]) + 1;
-            lines[currentLineIndex] = `${nextNumber}. `;
-            activeObject.set("text", lines.join("\n"));
-            activeObject.selectionStart = activeObject.selectionEnd = charCount + `${nextNumber}. `.length;
+            const newLines = [...lines];
+            newLines[currentLineIndex] = `${nextNumber}. `;
+            activeObject.set("text", newLines.join("\n"));
+            
+            // Set cursor after the number
+            let newCursorPos = 0;
+            for (let i = 0; i < currentLineIndex; i++) {
+              newCursorPos += newLines[i].length + 1;
+            }
+            newCursorPos += `${nextNumber}. `.length;
+            
+            activeObject.selectionStart = activeObject.selectionEnd = newCursorPos;
             fabricCanvas.renderAll();
-            return;
+            e.preventDefault?.();
           }
         }
       }
