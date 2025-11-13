@@ -231,7 +231,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
 
   const handleBulletList = () => {
     const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject && activeObject.type === "i-text") {
+    if (activeObject && (activeObject.type === "textbox" || activeObject.type === "i-text")) {
       const textObj = activeObject as IText;
       const text = textObj.text || "";
       const lines = text.split("\n");
@@ -256,7 +256,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
 
   const handleNumberedList = () => {
     const activeObject = fabricCanvas.getActiveObject();
-    if (activeObject && activeObject.type === "i-text") {
+    if (activeObject && (activeObject.type === "textbox" || activeObject.type === "i-text")) {
       const textObj = activeObject as IText;
       const text = textObj.text || "";
       const lines = text.split("\n");
