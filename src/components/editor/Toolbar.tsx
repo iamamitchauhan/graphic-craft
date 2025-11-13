@@ -169,6 +169,54 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     // For text changes, save immediately
     fabricCanvas.on("text:changed", saveState);
 
+    // Handle auto-continuation of lists when Enter is pressed
+    const handleTextInput = (e: any) => {
+      const activeObject = e.target;
+      if (activeObject && (activeObject.type === "textbox" || activeObject.type === "i-text")) {
+        const text = activeObject.text || "";
+        const lines = text.split("\n");
+        const cursorPosition = activeObject.selectionStart;
+        
+        // Find which line the cursor is on
+        let charCount = 0;
+        let currentLineIndex = 0;
+        for (let i = 0; i < lines.length; i++) {
+          charCount += lines[i].length + 1; // +1 for newline
+          if (charCount > cursorPosition) {
+            currentLineIndex = i;
+            break;
+          }
+        }
+        
+        // Check if we just added a new line (previous line has list formatting)
+        if (currentLineIndex > 0 && lines[currentLineIndex] === "") {
+          const previousLine = lines[currentLineIndex - 1];
+          
+          // Check for bullet list
+          if (previousLine.trim().startsWith("•")) {
+            lines[currentLineIndex] = "• ";
+            activeObject.set("text", lines.join("\n"));
+            activeObject.selectionStart = activeObject.selectionEnd = charCount + 2;
+            fabricCanvas.renderAll();
+            return;
+          }
+          
+          // Check for numbered list
+          const numberMatch = previousLine.trim().match(/^(\d+)\.\s/);
+          if (numberMatch) {
+            const nextNumber = parseInt(numberMatch[1]) + 1;
+            lines[currentLineIndex] = `${nextNumber}. `;
+            activeObject.set("text", lines.join("\n"));
+            activeObject.selectionStart = activeObject.selectionEnd = charCount + `${nextNumber}. `.length;
+            fabricCanvas.renderAll();
+            return;
+          }
+        }
+      }
+    };
+
+    fabricCanvas.on("text:changed", handleTextInput);
+
     return () => {
       clearTimeout(initTimeout);
       if (saveTimeoutRef.current) {
@@ -182,6 +230,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       fabricCanvas.off("object:skewing", handleModifyStart);
       fabricCanvas.off("object:modified", handleModifyEnd);
       fabricCanvas.off("text:changed", saveState);
+      fabricCanvas.off("text:changed", handleTextInput);
     };
   }, [fabricCanvas]);
 
@@ -236,16 +285,21 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       const text = textObj.text || "";
       const lines = text.split("\n");
       
+      // Remove any existing list formatting first
+      const cleanLines = lines.map(line => 
+        line.replace(/^•\s*/, "").replace(/^\d+\.\s*/, "").trim()
+      );
+      
       // Check if already has bullets
       const hasBullets = lines.every(line => line.trim().startsWith("•") || line.trim() === "");
       
       if (hasBullets) {
         // Remove bullets
-        const newText = lines.map(line => line.replace(/^•\s*/, "")).join("\n");
+        const newText = cleanLines.join("\n");
         textObj.set("text", newText);
       } else {
         // Add bullets
-        const newText = lines.map(line => line.trim() ? `• ${line.trim()}` : "").join("\n");
+        const newText = cleanLines.map(line => line ? `• ${line}` : "").join("\n");
         textObj.set("text", newText);
       }
       
@@ -261,19 +315,24 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
       const text = textObj.text || "";
       const lines = text.split("\n");
       
+      // Remove any existing list formatting first
+      const cleanLines = lines.map(line => 
+        line.replace(/^•\s*/, "").replace(/^\d+\.\s*/, "").trim()
+      );
+      
       // Check if already has numbers
       const hasNumbers = lines.every(line => /^\d+\.\s/.test(line.trim()) || line.trim() === "");
       
       if (hasNumbers) {
         // Remove numbers
-        const newText = lines.map(line => line.replace(/^\d+\.\s*/, "")).join("\n");
+        const newText = cleanLines.join("\n");
         textObj.set("text", newText);
       } else {
         // Add numbers
         let counter = 1;
-        const newText = lines.map(line => {
-          if (line.trim()) {
-            return `${counter++}. ${line.trim()}`;
+        const newText = cleanLines.map(line => {
+          if (line) {
+            return `${counter++}. ${line}`;
           }
           return "";
         }).join("\n");
