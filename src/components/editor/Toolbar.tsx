@@ -170,9 +170,17 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     fabricCanvas.on("text:changed", saveState);
 
     // Handle auto-continuation of lists when Enter is pressed
+    let isAutoAddingListFormat = false;
+    
     const handleTextInput = (e: any) => {
       const activeObject = e.target;
       if (!activeObject || (activeObject.type !== "textbox" && activeObject.type !== "i-text")) return;
+      
+      // Skip if we're in the middle of auto-adding list formatting
+      if (isAutoAddingListFormat) {
+        isAutoAddingListFormat = false;
+        return;
+      }
       
       const text = activeObject.text || "";
       const lines = text.split("\n");
@@ -204,6 +212,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
         if (hasNoFormatting && currentLine.trim() === "") {
           // Check for bullet list
           if (previousLine.trim().startsWith("•")) {
+            isAutoAddingListFormat = true;
             const newLines = [...lines];
             newLines[currentLineIndex] = "• ";
             activeObject.set("text", newLines.join("\n"));
@@ -217,12 +226,13 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             
             activeObject.selectionStart = activeObject.selectionEnd = newCursorPos;
             fabricCanvas.renderAll();
-            e.preventDefault?.();
+            return;
           }
           
           // Check for numbered list
           const numberMatch = previousLine.trim().match(/^(\d+)\.\s/);
           if (numberMatch) {
+            isAutoAddingListFormat = true;
             const nextNumber = parseInt(numberMatch[1]) + 1;
             const newLines = [...lines];
             newLines[currentLineIndex] = `${nextNumber}. `;
@@ -237,7 +247,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
             
             activeObject.selectionStart = activeObject.selectionEnd = newCursorPos;
             fabricCanvas.renderAll();
-            e.preventDefault?.();
+            return;
           }
         }
       }
