@@ -464,6 +464,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       fabricCanvas.bringObjectForward(activeObject);
+      fabricCanvas.discardActiveObject();
       fabricCanvas.renderAll();
       saveStateToHistory(); // Save layer change
     }
@@ -473,6 +474,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       fabricCanvas.sendObjectBackwards(activeObject);
+      fabricCanvas.discardActiveObject();
       fabricCanvas.renderAll();
       saveStateToHistory(); // Save layer change
     }
@@ -482,6 +484,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       fabricCanvas.bringObjectToFront(activeObject);
+      fabricCanvas.discardActiveObject();
       fabricCanvas.renderAll();
       saveStateToHistory(); // Save layer change
     }
@@ -491,6 +494,7 @@ const Toolbar = ({ fabricCanvas, currentTemplate, onTemplateChange }: Props) => 
     const activeObject = fabricCanvas.getActiveObject();
     if (activeObject) {
       fabricCanvas.sendObjectToBack(activeObject);
+      fabricCanvas.discardActiveObject();
       fabricCanvas.renderAll();
       saveStateToHistory(); // Save layer change
     }
