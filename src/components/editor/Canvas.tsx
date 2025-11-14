@@ -306,8 +306,8 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
   }, [template, onCanvasReady, initialData]);
 
   const handleContainerClick = (e: React.MouseEvent) => {
-    // Check if click was outside the canvas element
-    if (fabricCanvasRef.current && canvasRef.current && !canvasRef.current.contains(e.target as Node)) {
+    // Only deselect if click was directly on the container (outside canvas)
+    if (fabricCanvasRef.current && e.target === containerRef.current) {
       fabricCanvasRef.current.discardActiveObject();
       fabricCanvasRef.current.renderAll();
     }
