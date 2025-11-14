@@ -12,6 +12,7 @@ type Props = {
 const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fabricCanvasRef = useRef<FabricCanvas | null>(null);
 
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -288,6 +289,7 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    fabricCanvasRef.current = canvas;
     onCanvasReady(canvas);
     toast.success(`Canvas ready: ${template.name}`);
 
@@ -298,12 +300,25 @@ const Canvas = ({ template, onCanvasReady, initialData }: Props) => {
         Textbox.prototype.enterEditing = originalEnterEditing;
       }
       window.removeEventListener("keydown", handleKeyDown);
+      fabricCanvasRef.current = null;
       canvas.dispose();
     };
   }, [template, onCanvasReady, initialData]);
 
+  const handleContainerClick = (e: React.MouseEvent) => {
+    // Check if click was outside the canvas element
+    if (fabricCanvasRef.current && canvasRef.current && !canvasRef.current.contains(e.target as Node)) {
+      fabricCanvasRef.current.discardActiveObject();
+      fabricCanvasRef.current.renderAll();
+    }
+  };
+
   return (
-    <div ref={containerRef} className="w-full h-full flex items-center justify-center overflow-auto p-4">
+    <div 
+      ref={containerRef} 
+      className="w-full h-full flex items-center justify-center overflow-auto p-4"
+      onClick={handleContainerClick}
+    >
       <div className="shadow-2xl rounded-lg overflow-hidden bg-[hsl(var(--canvas-bg))] max-w-full max-h-full">
         <canvas ref={canvasRef} className="max-w-full max-h-full" style={{ display: "block" }} />
       </div>
